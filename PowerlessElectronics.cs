@@ -57,6 +57,22 @@ namespace Oxide.Plugins
 
         private void ProcessIOEntity(IOEntity ioEntity)
         {
+            if (ioEntity is FluidSwitch)
+            {
+                if (!HasInput(ioEntity, 2))
+                    ioEntity.UpdateFromInput(FreePower, 2);
+
+                return;
+            }
+
+            if (ioEntity is WaterPurifier)
+            {
+                if (!HasInput(ioEntity, 1))
+                    ioEntity.UpdateFromInput(FreePower, 1);
+
+                return;
+            }
+
             if (HasOnePowerInput(ioEntity))
             {
                 if (!HasInput(ioEntity, 0))
@@ -85,29 +101,37 @@ namespace Oxide.Plugins
         {
             return
                 ioEntity is AdvancedChristmasLights ||
+                ioEntity is AudioAlarm ||  // TODO: Disable by default
+                ioEntity is CeilingLight ||
+                ioEntity is CCTV_RC ||
                 ioEntity is ElectricalBranch ||
                 ioEntity is ElectricalBlocker || // TODO: Differentiate from RANDSwitch
                 ioEntity is ElectricalDFlipFlop ||
                 ioEntity is ElectricalHeater ||
-                ioEntity is ElectricSwitch ||
-                ioEntity is CeilingLight ||
+                ioEntity is ElectricSwitch || // TODO: Differentiate from FluidSwitch
                 ioEntity is ElevatorIOEntity ||
                 ioEntity is FlasherLight ||
+                ioEntity is FluidSwitch ||
+                ioEntity is Igniter || // TODO: Disable by default
                 ioEntity is HBHFSensor ||
                 ioEntity is LaserDetector ||
                 ioEntity is ModularCarGarage ||
+                ioEntity is NeonSign ||
                 ioEntity is PowerCounter ||
                 ioEntity is PressButton ||
                 ioEntity is PressurePad ||
+                ioEntity is ReactiveTarget ||
                 ioEntity is RFReceiver ||
                 ioEntity is SamSite ||
                 ioEntity is SearchLight ||
+                ioEntity is SimpleLight ||
                 ioEntity is SirenLight ||
                 ioEntity is SmartSwitch ||
                 ioEntity is Splitter ||
                 ioEntity is StorageMonitor ||
                 ioEntity is Telephone ||
-                ioEntity is TimerSwitch;
+                ioEntity is TimerSwitch ||
+                ioEntity is WaterPump;
         }
 
         private bool HasTwoPowerInputs(IOEntity ioEntity)
