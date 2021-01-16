@@ -8,7 +8,7 @@ using System.Linq;
 namespace Oxide.Plugins
 {
     [Info("Powerless Electronics", "WhiteThunder", "0.1.0")]
-    [Description("Allows various electrical entities to generate their own power when not plugged in.")]
+    [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
         #region Fields
@@ -16,7 +16,7 @@ namespace Oxide.Plugins
         private const string PermissionAll = "powerlesselectronics.all";
         private const string PermissionEntityFormat = "powerlesselectronics.{0}";
 
-        private Configuration pluginConfig;
+        private Configuration _pluginConfig;
 
         #endregion
 
@@ -24,10 +24,10 @@ namespace Oxide.Plugins
 
         private void Init()
         {
-            pluginConfig.GeneratePermissionNames();
+            _pluginConfig.GeneratePermissionNames();
 
             permission.RegisterPermission(PermissionAll, this);
-            foreach (var entry in pluginConfig.Entities)
+            foreach (var entry in _pluginConfig.Entities)
                 permission.RegisterPermission(entry.Value.PermissionName, this);
 
             Unsubscribe(nameof(OnEntitySpawned));
@@ -59,10 +59,62 @@ namespace Oxide.Plugins
 
         #region Helper Methods
 
-        private bool InputUpdateWasBlocked(IOEntity ioEntity, int inputSlot, int amount)
+        private static bool InputUpdateWasBlocked(IOEntity ioEntity, int inputSlot, int amount)
         {
             object hookResult = Interface.CallHook("OnPowerlessInputUpdate", inputSlot, ioEntity, amount);
             return hookResult is bool && (bool)hookResult == false;
+        }
+
+        private static void MaybeProvidePower(IOEntity ioEntity, EntityConfig entityConfig, bool updateAllInputs)
+        {
+            // This is placed here instead of in the calling method in case it needs to be delayed
+            // Since many IO entities may be parented after spawn to work around the rendering bug
+            if (ShouldIngoreEntity(ioEntity))
+                return;
+
+            for (var i = 0; i < entityConfig.InputSlots.Length; i++)
+            {
+                var inputSlot = entityConfig.InputSlots[i];
+                var powerAmount = entityConfig.GetPowerForSlot(inputSlot);
+
+                if ((updateAllInputs || powerAmount > 0) && !HasConnectedInput(ioEntity, inputSlot))
+                    TryProvidePower(ioEntity, inputSlot, powerAmount);
+            }
+        }
+
+        private static bool ShouldIngoreEntity(IOEntity ioEntity)
+        {
+            // Parented entities are assumed to be controlled by other plugins that can manage power themselves
+            // Exception being elevator io entities and storage monitors which are parented in vanilla
+            if (ioEntity.HasParent() & !(ioEntity is ElevatorIOEntity) && !(ioEntity is StorageMonitor))
+                return true;
+
+            // Turrets and sam sites with switches on them are assumed to be controlled by other plugins
+            if ((ioEntity is AutoTurret || ioEntity is SamSite) && GetChildEntity<ElectricSwitch>(ioEntity) != null)
+                return true;
+
+            return false;
+        }
+
+        private static T GetChildEntity<T>(BaseEntity entity) where T : BaseEntity
+        {
+            for (var i = 0; i < entity.children.Count; i++)
+            {
+                var child = entity.children[i] as T;
+                if (child != null)
+                    return child;
+            }
+            return null;
+        }
+
+        private static bool HasConnectedInput(IOEntity ioEntity, int inputSlot) =>
+            inputSlot < ioEntity.inputs.Length &&
+            ioEntity.inputs[inputSlot].connectedTo.Get() != null;
+
+        private static void TryProvidePower(IOEntity ioEntity, int inputSlot, int powerAmount)
+        {
+            if (ioEntity.inputs.Length > inputSlot && !InputUpdateWasBlocked(ioEntity, inputSlot, powerAmount))
+                ioEntity.UpdateFromInput(powerAmount, inputSlot);
         }
 
         private void ProcessIOEntity(IOEntity ioEntity, bool updateAllInputs, bool delay)
@@ -112,58 +164,6 @@ namespace Oxide.Plugins
                 permission.UserHasPermission(ownerIdString, entityConfig.PermissionName);
         }
 
-        private void MaybeProvidePower(IOEntity ioEntity, EntityConfig entityConfig, bool updateAllInputs)
-        {
-            // This is placed here instead of in the calling method in case it needs to be delayed
-            // Since many IO entities may be parented after spawn to work around the rendering bug
-            if (ShouldIngoreEntity(ioEntity))
-                return;
-
-            for (var i = 0; i < entityConfig.InputSlots.Length; i++)
-            {
-                var inputSlot = entityConfig.InputSlots[i];
-                var powerAmount = entityConfig.GetPowerForSlot(inputSlot);
-
-                if ((updateAllInputs || powerAmount > 0) && !HasConnectedInput(ioEntity, inputSlot))
-                    TryProvidePower(ioEntity, inputSlot, powerAmount);
-            }
-        }
-
-        private bool ShouldIngoreEntity(IOEntity ioEntity)
-        {
-            // Parented entities are assumed to be controlled by other plugins that can manage power themselves
-            // Exception being elevator io entities and storage monitors which are parented in vanilla
-            if (ioEntity.HasParent() & !(ioEntity is ElevatorIOEntity) && !(ioEntity is StorageMonitor))
-                return true;
-
-            // Turrets and sam sites with switches on them are assumed to be controlled by other plugins
-            if ((ioEntity is AutoTurret || ioEntity is SamSite) && GetChildEntity<ElectricSwitch>(ioEntity) != null)
-                return true;
-
-            return false;
-        }
-
-        private T GetChildEntity<T>(BaseEntity entity) where T : BaseEntity
-        {
-            for (var i = 0; i < entity.children.Count; i++)
-            {
-                var child = entity.children[i] as T;
-                if (child != null)
-                    return child;
-            }
-            return null;
-        }
-
-        private bool HasConnectedInput(IOEntity ioEntity, int inputSlot) =>
-            inputSlot < ioEntity.inputs.Length &&
-            ioEntity.inputs[inputSlot].connectedTo.Get() != null;
-
-        private void TryProvidePower(IOEntity ioEntity, int inputSlot, int powerAmount)
-        {
-            if (ioEntity.inputs.Length > inputSlot && !InputUpdateWasBlocked(ioEntity, inputSlot, powerAmount))
-                ioEntity.UpdateFromInput(powerAmount, inputSlot);
-        }
-
         #endregion
 
         #region Configuration
@@ -171,10 +171,10 @@ namespace Oxide.Plugins
         private EntityConfig GetEntityConfig(IOEntity ioEntity)
         {
             EntityConfig entityConfig;
-            return pluginConfig.Entities.TryGetValue(ioEntity.ShortPrefabName, out entityConfig) ? entityConfig : null;
+            return _pluginConfig.Entities.TryGetValue(ioEntity.ShortPrefabName, out entityConfig) ? entityConfig : null;
         }
 
-        internal class Configuration : SerializableConfiguration
+        private class Configuration : SerializableConfiguration
         {
             public void GeneratePermissionNames()
             {
@@ -309,14 +309,14 @@ namespace Oxide.Plugins
 
         #region Configuration Boilerplate
 
-        internal class SerializableConfiguration
+        private class SerializableConfiguration
         {
             public string ToJson() => JsonConvert.SerializeObject(this);
 
             public Dictionary<string, object> ToDictionary() => JsonHelper.Deserialize(ToJson()) as Dictionary<string, object>;
         }
 
-        internal static class JsonHelper
+        private static class JsonHelper
         {
             public static object Deserialize(string json) => ToObject(JToken.Parse(json));
 
@@ -378,20 +378,20 @@ namespace Oxide.Plugins
             return changed;
         }
 
-        protected override void LoadDefaultConfig() => pluginConfig = GetDefaultConfig();
+        protected override void LoadDefaultConfig() => _pluginConfig = GetDefaultConfig();
 
         protected override void LoadConfig()
         {
             base.LoadConfig();
             try
             {
-                pluginConfig = Config.ReadObject<Configuration>();
-                if (pluginConfig == null)
+                _pluginConfig = Config.ReadObject<Configuration>();
+                if (_pluginConfig == null)
                 {
                     throw new JsonException();
                 }
 
-                if (MaybeUpdateConfig(pluginConfig))
+                if (MaybeUpdateConfig(_pluginConfig))
                 {
                     LogWarning("Configuration appears to be outdated; updating and saving");
                     SaveConfig();
@@ -407,7 +407,7 @@ namespace Oxide.Plugins
         protected override void SaveConfig()
         {
             Log($"Configuration changes saved to {Name}.json");
-            Config.WriteObject(pluginConfig, true);
+            Config.WriteObject(_pluginConfig, true);
         }
 
         #endregion
