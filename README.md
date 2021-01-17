@@ -1,10 +1,10 @@
 ## Features
 
-- Allow any electrical entity to generate its own power
-- Configure power amount for each entity type and input separately
-- Optionally require permissions, on a per entity basis with separate permissions for each
+- Allows any electrical entity to generate its own power
+- Configurable power amount for each entity type and input slot
+- Optionally only applies to entities deployed by players with permissions, configurable per entity type
 - Designed to work with circuits, so inputs with a wire in them are ignored
-  - As soon as an input wire is disconnected, power magically starts flowing in its place
+  - As soon as an input wire is disconnected, power automatically starts flowing in its place
 
 ## Permissions
 
@@ -47,10 +47,10 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.sam_site_turret`
 - `powerlesselectronics.searchlight`
 - `powerlesselectronics.sign.neon.125x125`
-- `powerlesselectronics.sign.neon.125x215.animated`
 - `powerlesselectronics.sign.neon.125x215`
-- `powerlesselectronics.sign.neon.xl.animated`
+- `powerlesselectronics.sign.neon.125x215.animated`
 - `powerlesselectronics.sign.neon.xl`
+- `powerlesselectronics.sign.neon.xl.animated`
 - `powerlesselectronics.simplelight`
 - `powerlesselectronics.smallrechargablebattery`
 - `powerlesselectronics.smartalarm`
@@ -231,19 +231,19 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
-    "sign.neon.125x215.animated": {
-      "RequirePermission": false,
-      "PowerAmount": 0
-    },
     "sign.neon.125x215": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
-    "sign.neon.xl.animated": {
+    "sign.neon.125x215.animated": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
     "sign.neon.xl": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "sign.neon.xl.animated": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
@@ -318,55 +318,55 @@ Default configuration (no entities provide free power):
 
 ### Entity power requirements
 
-Power requirements are listed below for your convenience. Be sure to visit the [Rust Labs website](https://rustlabs.com) for the most up-to-date information. Keep in mind that the numbers I have provided below may be a little higher than the actual electricity cost of some entities because they are effectively useless without providing extra power for the outputs, so think of these as the practical minimums. I have added a + for entities where adding more power provides a useful function besides simple passthrough.
+The minimum amount of useful power for each entity is listed below. These may be a little higher than the power requirement since some entities are effectively useless without providing extra power for the outputs. I have added a + for entities where adding more power provides a useful function besides simple passthrough.
 
-- `andswitch.entity` -- 2+, 2+
-- `audioalarm` -- 1
-- `autoturret_deployed` -- 10+
-- `button` -- 2+
-- `cctv_deployed` -- 5
-- `ceilinglight.deployed` -- 2
-- `counter` -- 1+
-- `doorcontroller.deployed` -- 1+
-- `electric.flasherlight.deployed` -- 1
-- `electric.sirenlight.deployed` -- 1
-- `electrical.blocker.deployed` -- 2+
-- `electrical.branch.deployed` -- 4+
-- `electrical.combiner.deployed` -- 1+, 1+
-- `electrical.heater` -- 3
-- `electrical.memorycell.deployed` -- 1+
-- `electrical.modularcarlift.deployed` -- 5
-- `electrical.random.switch.deployed` -- 2+
-- `elevatorioentity` -- 5
-- `fluidswitch` -- 0-1
-- `hbhfsensor.deployed` -- 1
-- `igniter.deployed` -- 2
-- `laserdetector` -- 2+
-- `orswitch.entity` -- 2+, 2+
-- `poweredwaterpurifier.deployed` -- 5
-- `pressurepad.deployed` -- 2+
-- `reactivetarget_deployed` -- 2+
-- `rfbroadcaster` -- 1
-- `rfreceiver` -- 2+
-- `sam_site_turret_deployed` -- 25
-- `searchlight.deployed` -- 10
-- `sign.neon.125x125` -- 4
-- `sign.neon.125x215.animated` - 10
-- `sign.neon.125x215` -- 6
-- `sign.neon.xl.animated` - 15
-- `sign.neon.xl` -- 8
-- `simplelight` -- 1
-- `smartalarm` -- 1+
-- `smartswitch` -- 2+
-- `splitter` -- 4+
-- `storagemonitor.deployed` -- 1+
-- `switch` -- 2+
-- `telephone.deployed` -- 1+
-- `teslacoil.deployed` -- 1-35
-- `timer` -- 2+
-- `water.pump.deployed` -- 5
-- `xmas.advanced.lights.deployed` -- 5
-- `xorswitch.entity` -- 1+
+- `andswitch.entity`: 2+, 2+
+- `audioalarm`: 1
+- `autoturret_deployed`: 10+
+- `button`: 2+
+- `cctv_deployed`: 5
+- `ceilinglight.deployed`: 2
+- `counter`: 1+
+- `doorcontroller.deployed`: 1+
+- `electric.flasherlight.deployed`: 1
+- `electric.sirenlight.deployed`: 1
+- `electrical.blocker.deployed`: 2+
+- `electrical.branch.deployed`: 4+
+- `electrical.combiner.deployed`: 1+, 1+
+- `electrical.heater`: 3
+- `electrical.memorycell.deployed`: 1+
+- `electrical.modularcarlift.deployed`: 5
+- `electrical.random.switch.deployed`: 2+
+- `elevatorioentity`: 5
+- `fluidswitch`: 1
+- `hbhfsensor.deployed`: 2+
+- `igniter.deployed`: 2
+- `laserdetector`: 2+
+- `orswitch.entity`: 2+, 2+
+- `poweredwaterpurifier.deployed`: 5
+- `pressurepad.deployed`: 2+
+- `reactivetarget_deployed`: 2+
+- `rfbroadcaster`: 1
+- `rfreceiver`: 2+
+- `sam_site_turret_deployed`: 25
+- `searchlight.deployed`: 10
+- `sign.neon.125x125`: 4
+- `sign.neon.125x215`: 6
+- `sign.neon.125x215.animated`: 10
+- `sign.neon.xl`: 8
+- `sign.neon.xl.animated`: 15
+- `simplelight`: 1
+- `smartalarm`: 1
+- `smartswitch`: 2+
+- `splitter`: 4+
+- `storagemonitor.deployed`: 1+
+- `switch`: 2+
+- `telephone.deployed`: 1+
+- `teslacoil.deployed`: 1-35
+- `timer`: 2+
+- `water.pump.deployed`: 5
+- `xmas.advanced.lights.deployed`: 5
+- `xorswitch.entity`: 1+
 
 ## Developer Hooks
 
@@ -374,7 +374,7 @@ Parented entities are already ignored by this plugin, so plugin conflicts are un
 
 #### OnPowerlessInputUpdate
 
-- Called when this plugin is about to add or remove power for a particular entity's input slot
+- Called when this plugin is about to provide power for a particular entity's empty input slot
 - Returning `false` will prevent this plugin from affecting the entity
 - Returning `null` will result in the default behavior
 
