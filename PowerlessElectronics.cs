@@ -39,7 +39,7 @@ namespace Oxide.Plugins
             {
                 var ioEntity = entity as IOEntity;
                 if (ioEntity != null)
-                    ProcessIOEntity(ioEntity, updateAllInputs: true, delay: false);
+                    ProcessIOEntity(ioEntity, delay: false);
             }
 
             Subscribe(nameof(OnEntitySpawned));
@@ -47,12 +47,12 @@ namespace Oxide.Plugins
 
         private void OnEntitySpawned(IOEntity ioEntity)
         {
-            ProcessIOEntity(ioEntity, updateAllInputs: false, delay: true);
+            ProcessIOEntity(ioEntity, delay: true);
         }
 
         private void OnIORefCleared(IOEntity.IORef ioRef, IOEntity ioEntity)
         {
-            ProcessIOEntity(ioEntity, updateAllInputs: false, delay: true);
+            ProcessIOEntity(ioEntity, delay: true);
         }
 
         #endregion
@@ -65,7 +65,7 @@ namespace Oxide.Plugins
             return hookResult is bool && (bool)hookResult == false;
         }
 
-        private static void MaybeProvidePower(IOEntity ioEntity, EntityConfig entityConfig, bool updateAllInputs)
+        private static void MaybeProvidePower(IOEntity ioEntity, EntityConfig entityConfig)
         {
             // This is placed here instead of in the calling method in case it needs to be delayed
             // Since many IO entities may be parented after spawn to work around the rendering bug
@@ -77,7 +77,8 @@ namespace Oxide.Plugins
                 var inputSlot = entityConfig.InputSlots[i];
                 var powerAmount = entityConfig.GetPowerForSlot(inputSlot);
 
-                if ((updateAllInputs || powerAmount > 0) && !HasConnectedInput(ioEntity, inputSlot))
+                // Don't update power if specified to be 0 to avoid conflicts with other plugins
+                if (powerAmount > 0 && !HasConnectedInput(ioEntity, inputSlot))
                     TryProvidePower(ioEntity, inputSlot, powerAmount);
             }
         }
@@ -117,7 +118,7 @@ namespace Oxide.Plugins
                 ioEntity.UpdateFromInput(powerAmount, inputSlot);
         }
 
-        private void ProcessIOEntity(IOEntity ioEntity, bool updateAllInputs, bool delay)
+        private void ProcessIOEntity(IOEntity ioEntity, bool delay)
         {
             if (ioEntity == null)
                 return;
@@ -128,7 +129,7 @@ namespace Oxide.Plugins
             if (entityConfig == null)
                 return;
 
-            if (!entityConfig.Enabled && !updateAllInputs)
+            if (!entityConfig.Enabled)
                 return;
 
             if (!EntityOwnerHasPermission(ioEntity, entityConfig))
@@ -141,12 +142,12 @@ namespace Oxide.Plugins
                     if (ioEntity == null)
                         return;
 
-                    MaybeProvidePower(ioEntity, entityConfig, updateAllInputs);
+                    MaybeProvidePower(ioEntity, entityConfig);
                 });
             }
             else
             {
-                MaybeProvidePower(ioEntity, entityConfig, updateAllInputs);
+                MaybeProvidePower(ioEntity, entityConfig);
             }
         }
 
