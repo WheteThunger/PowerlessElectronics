@@ -310,11 +310,12 @@ Default configuration (no entities provide free power):
 }
 ```
 
-- `Entities` -- Each entity has a separate configuration, based on the prefab short name.
-  - `RequirePermission` (`true` or `false`) -- While `true`, only entities of this type that were deployed by players with the corresponding permission will receive the power configured here. While `false`, all entities of this type will have the power configured here.
-  - `PowerAmount` -- Amount of power to provide to each input where a wire is missing.
-  - `PowerAmounts` -- List of power amounts, applicable when the entity has multiple power inputs. You can also use the `PowerAmount` (singular) option to apply the same amount to all inputs.
-  - `InputSlots` (Advanced) -- You can probably ignore this option. The game assigns internal slot numbers to differentiate each power input. Mosts entities only have one power input which is usually at slot `0`, but some have multiple or use different numbers due to also having water inputs. You should only need to change this option if you want to configure an entity that is not yet in the plugin's default configuration, such as when new items are introduced to the game.
+Each entity type has the following configuration options, mapped in the config to the entity's prefab short name.
+
+- `RequirePermission` (`true` or `false`) -- While `true`, only entities of this type that were deployed by players with the corresponding permission will receive the power configured here. While `false`, all entities of this type will have the power configured here.
+- `PowerAmount` -- Amount of power to provide to each input where a wire is missing.
+- `PowerAmounts` -- List of power amounts, applicable when the entity has multiple power inputs. You can also use the `PowerAmount` (singular) option to apply the same amount to all inputs.
+- `InputSlots` (Advanced) -- You can probably ignore this option. The game assigns internal slot numbers to differentiate each power input. Mosts entities only have one power input which is usually at slot `0`, but some have multiple or use different numbers due to also having water inputs. You should only need to change this option if you want to configure an entity that is not yet in the plugin's default configuration, such as when new items are introduced to the game.
 
 Note: This plugin ignores any input slot which is configured with `0` power, so it will not interfere with other plugins that provide powerless functionality. The only gotcha is that if you provided free power to an entity via this plugin and then changed the configuration to provide `0` power, the entity will have free power until a wire is connected to that input, or until the next server restart.
 
