@@ -190,6 +190,7 @@ namespace Oxide.Plugins
                 }
             }
 
+            [JsonProperty("Entities")]
             public Dictionary<string, EntityConfig> Entities = new Dictionary<string, EntityConfig>()
             {
                 ["andswitch.entity"] = new EntityConfig() { InputSlots = new int[] { 0, 1 }, PowerAmounts = new int[] { 0, 0 } },
