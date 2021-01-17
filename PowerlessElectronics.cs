@@ -72,9 +72,8 @@ namespace Oxide.Plugins
             if (ShouldIngoreEntity(ioEntity))
                 return;
 
-            for (var i = 0; i < entityConfig.InputSlots.Length; i++)
+            foreach (var inputSlot in entityConfig.InputSlots)
             {
-                var inputSlot = entityConfig.InputSlots[i];
                 var powerAmount = entityConfig.GetPowerForSlot(inputSlot);
 
                 // Don't update power if specified to be 0 to avoid conflicts with other plugins
@@ -99,11 +98,11 @@ namespace Oxide.Plugins
 
         private static T GetChildEntity<T>(BaseEntity entity) where T : BaseEntity
         {
-            for (var i = 0; i < entity.children.Count; i++)
+            foreach (var child in entity.children)
             {
-                var child = entity.children[i] as T;
-                if (child != null)
-                    return child;
+                var childOfType = child as T;
+                if (childOfType != null)
+                    return childOfType;
             }
             return null;
         }
