@@ -8,7 +8,7 @@
 
 ## Permissions
 
-Note: Permissions are only necessary if the corresponding entity's configuration has specified `"RequirePermission": true`. The default is `false` for all entities, meaning permissions are not required until you change that.
+Note: Permissions are only necessary if the corresponding entity's configuration has specified `"RequirePermission": true`. The default is `false` for all entities.
 
 - `powerlesselectronics.all` -- All electrical entities deployed by players with this permission will have free power determined by the plugin configuration. You must also configure the power amount for each entity for this to have any effect.
 
@@ -321,7 +321,7 @@ Note: This plugin ignores any input slot which is configured with `0` power, so 
 
 ### Entity power requirements
 
-The minimum amount of useful power for each entity is listed below. These may be a little higher than the power requirement since some entities are effectively useless without providing extra power for the outputs. I have added a + for entities where adding more power provides a useful function besides simple passthrough.
+To help you configure the plugin for your use case, the minimum amount of useful power for each entity is listed below. These may be a little higher than the power requirement since some entities are effectively useless without providing extra power for the outputs. I have added a + for entities where adding more power provides a useful function besides simple passthrough.
 
 - `andswitch.entity`: 2+, 2+
 - `audioalarm`: 1
@@ -370,6 +370,28 @@ The minimum amount of useful power for each entity is listed below. These may be
 - `water.pump.deployed`: 5
 - `xmas.advanced.lights.deployed`: 5
 - `xorswitch.entity`: 1+
+
+## FAQ
+
+**Q: Why would I provide free power to a branch or splitter?**
+
+A: To allow them to function as essentially a test generator with multiple outputs. Very useful.
+
+**Q: Why would I provide free power to an AND switch?**
+
+A: So it can be used to boost the low power output of a HBHF sensor since it only outputs 1 power per detected player.
+
+For example, if you want to chain multiple HBHF sensors together using OR switches, the OR switches will consume all the power that the HBHF sensors are sending, rendering them effectively useless. To mitigate this, you can boost the power output of each HBHF sensor by sending its output through an AND switch that has additional power in the other input, which you can get for free with this plugin (no generator needed).
+
+**Q: Why would I provide free power to a smart alarm?**
+
+A: To simplify some valid circuit designs.
+
+For example, in vanilla, you may design a circuit where the destruction of a wall or floor triggers the smart alarm, using the following wiring.
+
+Power generator -> Electrical Branch (attached to a wall) -> Blocker ("Block Passthrough" input) -> Smart alarm
+
+When the wall that the electrical branch is attached to is destroyed, power will resume flowing through the blocker to trigger the smart alarm. With free power to the smart alarm, you can simply place something like a switch or button on the wall, connect it to the smart alarm, and leave it always off. When that entity is destroyed with the wall, the wire will disconnect, allowing the smart alarm to start generating its own power and trigger a notification.
 
 ## Developer Hooks
 
