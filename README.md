@@ -1,10 +1,31 @@
 ## Features
 
-- Allows any electrical entity to generate its own power
-- Configurable power amount for each entity type and input slot
+- Allows any electrical entity to generate a configurable amount of power
+  - Allows making entities effectively powerless by generating exactly the power they require (e.g., 3 for Electric Heaters)
+  - Allows making entities function as test generators by generating more power than they need (e.g., 1000 for Splitters)
 - Optionally only applies to entities deployed by players with permissions, configurable per entity type
 - Designed to work with circuits, so inputs with a wire in them are ignored
-  - As soon as an input wire is disconnected, power automatically starts flowing in its place
+
+This plugin **does not** allow changing power requirements directly. For example, SAM Sites will always require 25 power (unless another plugin changes that), but you can use this plugin to provide that full amount for free. You can technically configure entities to generate less power than they require, but it will have no effect.
+
+## Installation
+
+1. Add the plugin to the `oxide/plugins` directory of your Rust server installation
+2. Update the plugin configuration to determine how much free power each entity type should get and whether permissions should be required
+3. Grant permissions if applicable from the previous step (see Permissions section)
+4. Reload the plugin
+
+If you configured the plugin correctly, then:
+- Existing entities that were not plugged in will automatically be provided with the power amount you configured
+- Existing entities that were plugged in will be unaffected initially, but disconnecting the input wires will immediately cause those entities to generate the power amount you configured
+- Entities deployed later will automatically be provided the power amount you configured
+
+### Troubleshooting
+
+- After granting permissions or roles, you will need to reload the plugin to automatically power existing entities
+- Make sure you grant permissions for each entity that you configured with `"RequirePermission": true` (off by default)
+- Make sure that the amount of power you configured for each entity is at least the power requirement, or there will be no effect
+  - The configuration section below lists the power requirement for most entities to help you configure the plugin for your use case
 
 ## Permissions
 
@@ -315,7 +336,7 @@ Each entity type has the following configuration options, mapped in the config t
 - `RequirePermission` (`true` or `false`) -- While `true`, only entities of this type that were deployed by players with the corresponding permission will receive the power configured here. While `false`, all entities of this type will have the power configured here.
 - `PowerAmount` -- Amount of power to provide to each input where a wire is missing.
 - `PowerAmounts` -- List of power amounts, applicable when the entity has multiple power inputs. You can also use the `PowerAmount` (singular) option to apply the same amount to all inputs.
-- `InputSlots` (Advanced) -- You can probably ignore this option. The game assigns internal slot numbers to differentiate each power input. Mosts entities only have one power input which is usually at slot `0`, but some have multiple or use different numbers due to also having water inputs. You should only need to change this option if you want to configure an entity that is not yet in the plugin's default configuration, such as when new items are introduced to the game.
+- `InputSlots` (Advanced) -- You should only need to configure this option if you want to provide free power for an entity that is not yet in the plugin's default configuration, such as when new items are introduced to the game. This option controls which internal slot numbers to assign power to. Most entities only have one power input which is usually at slot `0`, but some have multiple or use different numbers due to also having water inputs.
 
 Note: This plugin ignores any input slot which is configured with `0` power, so it will not interfere with other plugins that provide powerless functionality. The only gotcha is that if you provided free power to an entity via this plugin and then changed the configuration to provide `0` power, the entity will have free power until a wire is connected to that input, or until the next server restart.
 
