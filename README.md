@@ -6,8 +6,6 @@
 - Optionally only applies to entities deployed by players with permissions, configurable per entity type
 - Designed to work with circuits, so inputs with a wire in them are ignored
 
-This plugin **does not** allow changing power requirements directly. For example, SAM Sites will always require 25 power (unless another plugin changes that), but you can use this plugin to provide that full amount for free. You can technically configure entities to generate less power than they require, but it will have no effect.
-
 ## Installation
 
 1. Add the plugin to the `oxide/plugins` directory of your Rust server installation
@@ -38,10 +36,14 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.andswitch`
 - `powerlesselectronics.audioalarm`
 - `powerlesselectronics.autoturret`
+- `powerlesselectronics.boombox`
 - `powerlesselectronics.button`
 - `powerlesselectronics.cctv`
 - `powerlesselectronics.ceilinglight`
 - `powerlesselectronics.counter`
+- `powerlesselectronics.discoball`
+- `powerlesselectronics.discofloor`
+- `powerlesselectronics.discofloor.largetiles`
 - `powerlesselectronics.doorcontroller`
 - `powerlesselectronics.flasherlight`
 - `powerlesselectronics.sirenlight`
@@ -57,8 +59,10 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.hbhfsensor`
 - `powerlesselectronics.igniter`
 - `powerlesselectronics.laserdetector`
+- `powerlesselectronics.laserlight`
 - `powerlesselectronics.large.rechargable.battery`
 - `powerlesselectronics.medium.rechargable.battery`
+- `powerlesselectronics.microphonestandio`
 - `powerlesselectronics.orswitch`
 - `powerlesselectronics.poweredwaterpurifier`
 - `powerlesselectronics.pressurepad`
@@ -112,6 +116,10 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "boombox.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "button": {
       "RequirePermission": false,
       "PowerAmount": 0
@@ -125,6 +133,18 @@ Default configuration (no entities provide free power):
       "PowerAmount": 0
     },
     "counter": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "discoball.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "discofloor.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "discofloor.largetiles.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
@@ -194,15 +214,23 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
-    "laserdetector": {
-      "RequirePermission": false,
-      "PowerAmount": 0
-    },
     "large.rechargable.battery.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "laserdetector": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "laserlight.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "medium.rechargable.battery.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "microphonestandio.entity": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
@@ -348,9 +376,13 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `audioalarm`: 1
 - `autoturret_deployed`: 10+
 - `button`: 2+
+- `boombox.deployed`: 1+
 - `cctv_deployed`: 5
 - `ceilinglight.deployed`: 2
 - `counter`: 1+
+- `discoball.deployed`: 1+
+- `discofloor.deployed`: 1+
+- `discofloor.largetiles.deployed`: 1+
 - `doorcontroller.deployed`: 1+
 - `electric.flasherlight.deployed`: 1
 - `electric.sirenlight.deployed`: 1
@@ -366,6 +398,8 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `hbhfsensor.deployed`: 2+
 - `igniter.deployed`: 2
 - `laserdetector`: 2+
+- `laserlight.deployed`: 1+
+- `microphonestandio`: 1+
 - `orswitch.entity`: 2+, 2+
 - `poweredwaterpurifier.deployed`: 5
 - `pressurepad.deployed`: 2+
@@ -425,5 +459,5 @@ Parented entities are already ignored by this plugin, so plugin conflicts are un
 - Returning `null` will result in the default behavior
 
 ```csharp
-object OnPowerlessInputUpdate(IOEntity ioEntity, int inputSlot, int powerAmount)
+bool? OnPowerlessInputUpdate(IOEntity ioEntity, int inputSlot, int powerAmount)
 ```

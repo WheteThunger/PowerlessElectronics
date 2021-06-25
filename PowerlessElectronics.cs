@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.0.0")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.1.0")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -17,6 +17,7 @@ namespace Oxide.Plugins
         private const string PermissionEntityFormat = "powerlesselectronics.{0}";
 
         private Configuration _pluginConfig;
+        private bool _isConfigValid = true;
 
         #endregion
 
@@ -24,17 +25,29 @@ namespace Oxide.Plugins
 
         private void Init()
         {
-            _pluginConfig.GeneratePermissionNames();
-
-            permission.RegisterPermission(PermissionAll, this);
-            foreach (var entry in _pluginConfig.Entities)
-                permission.RegisterPermission(entry.Value.PermissionName, this);
-
             Unsubscribe(nameof(OnEntitySpawned));
         }
 
         private void OnServerInitialized()
         {
+            // Don't overwrite the config if invalid since the user will lose their config!
+            if (_isConfigValid)
+            {
+                var addedPrefabs = _pluginConfig.AddMissingPrefabs();
+                if (addedPrefabs != null)
+                {
+                    LogWarning($"Discovered and added {addedPrefabs.Count} electrical entity types to Configuration.\n - {string.Join("\n - ", addedPrefabs)}");
+                    SaveConfig();
+                }
+            }
+
+            _pluginConfig.GeneratePermissionNames();
+
+            // Register permissions only after discovering prefabs.
+            permission.RegisterPermission(PermissionAll, this);
+            foreach (var entry in _pluginConfig.Entities)
+                permission.RegisterPermission(entry.Value.PermissionName, this);
+
             foreach (var entity in BaseNetworkable.serverEntities)
             {
                 var ioEntity = entity as IOEntity;
@@ -86,7 +99,10 @@ namespace Oxide.Plugins
         {
             // Parented entities are assumed to be controlled by other plugins that can manage power themselves
             // Exception being elevator io entities and storage monitors which are parented in vanilla
-            if (ioEntity.HasParent() & !(ioEntity is ElevatorIOEntity) && !(ioEntity is StorageMonitor))
+            if (ioEntity.HasParent()
+                && !(ioEntity is ElevatorIOEntity)
+                && !(ioEntity is MicrophoneStandIOEntity)
+                && !(ioEntity is StorageMonitor))
                 return true;
 
             // Turrets and sam sites with switches on them are assumed to be controlled by other plugins
@@ -176,6 +192,76 @@ namespace Oxide.Plugins
 
         private class Configuration : SerializableConfiguration
         {
+            private static readonly string[] IgnoredEntities = new string[]
+            {
+                // Has inputs to move the lift but does not consume power (elevatorioentity is the right one).
+                "elevator",
+
+                // Has inputs to toggle on/off but does not consume power.
+                "small_fuel_generator.deployed",
+
+                // Has audio input only
+                "connectedspeaker.deployed",
+                "soundlight.deployed",
+            };
+
+            private static bool HasElectricalInput(IOEntity ioEntity)
+            {
+                foreach (var input in ioEntity.inputs)
+                {
+                    if (input.type == IOEntity.IOType.Electric)
+                        return true;
+                }
+                return false;
+            }
+
+            private void SortEntities()
+            {
+                var shortPrefabNames = Entities.Keys.ToList();
+                shortPrefabNames.Sort();
+
+                var newEntities = new Dictionary<string, EntityConfig>();
+                foreach (var shortName in shortPrefabNames)
+                    newEntities[shortName] = Entities[shortName];
+
+                Entities = newEntities;
+            }
+
+            public List<string> AddMissingPrefabs()
+            {
+                var addedPrefabs = new List<string>();
+
+                foreach (var prefab in GameManifest.Current.entities)
+                {
+                    var ioEntity = GameManager.server.FindPrefab(prefab.ToLower())?.GetComponent<IOEntity>();
+                    if (ioEntity == null || string.IsNullOrEmpty(ioEntity.ShortPrefabName))
+                        continue;
+
+                    EntityConfig entityConfig;
+                    if (Entities.TryGetValue(ioEntity.ShortPrefabName, out entityConfig))
+                        continue;
+
+                    if (!HasElectricalInput(ioEntity)
+                        || ioEntity.pickup.itemTarget == null
+                        || ioEntity.ShortPrefabName.ToLower().Contains("static")
+                        || IgnoredEntities.Contains(ioEntity.ShortPrefabName.ToLower()))
+                        continue;
+
+                    addedPrefabs.Add(ioEntity.ShortPrefabName);
+                }
+
+                if (addedPrefabs.Count == 0)
+                    return null;
+
+                foreach (var shortPrefabName in addedPrefabs)
+                    Entities[shortPrefabName] = new EntityConfig();
+
+                SortEntities();
+
+                addedPrefabs.Sort();
+                return addedPrefabs;
+            }
+
             public void GeneratePermissionNames()
             {
                 foreach (var entry in Entities)
@@ -193,56 +279,48 @@ namespace Oxide.Plugins
             [JsonProperty("Entities")]
             public Dictionary<string, EntityConfig> Entities = new Dictionary<string, EntityConfig>()
             {
-                ["andswitch.entity"] = new EntityConfig() { InputSlots = new int[] { 0, 1 }, PowerAmounts = new int[] { 0, 0 } },
-                ["audioalarm"] = new EntityConfig(),
-                ["autoturret_deployed"] = new EntityConfig(),
-                ["button"] = new EntityConfig(),
-                ["cctv_deployed"] = new EntityConfig(),
-                ["ceilinglight.deployed"] = new EntityConfig(),
-                ["counter"] = new EntityConfig(),
-                ["doorcontroller.deployed"] = new EntityConfig(),
-                ["electric.flasherlight.deployed"] = new EntityConfig(),
-                ["electric.sirenlight.deployed"] = new EntityConfig(),
-                ["electrical.blocker.deployed"] = new EntityConfig(),
-                ["electrical.branch.deployed"] = new EntityConfig(),
-                ["electrical.combiner.deployed"] = new EntityConfig() { InputSlots = new int[] { 0, 1 }, PowerAmounts = new int[] { 0, 0 } },
-                ["electrical.heater"] = new EntityConfig(),
-                ["electrical.memorycell.deployed"] = new EntityConfig(),
+                ["andswitch.entity"] = new EntityConfig()
+                {
+                    InputSlots = new int[] { 0, 1 },
+                    PowerAmounts = new int[] { 0, 0 }
+                },
+
+                ["electrical.combiner.deployed"] = new EntityConfig()
+                {
+                    InputSlots = new int[] { 0, 1 },
+                    PowerAmounts = new int[] { 0, 0 }
+                },
+
+                // Has no pickup entity.
                 ["electrical.modularcarlift.deployed"] = new EntityConfig(),
-                ["electrical.random.switch.deployed"] = new EntityConfig(),
+
+                // Has no pickup entity.
                 ["elevatorioentity"] = new EntityConfig(),
-                ["fluidswitch"] = new EntityConfig() { InputSlots = new int[] { 2 } },
-                ["hbhfsensor.deployed"] = new EntityConfig(),
-                ["igniter.deployed"] = new EntityConfig(),
-                ["laserdetector"] = new EntityConfig(),
-                ["large.rechargable.battery.deployed"] = new EntityConfig(),
-                ["medium.rechargable.battery.deployed"] = new EntityConfig(),
-                ["orswitch.entity"] = new EntityConfig() { InputSlots = new int[] { 0, 1 }, PowerAmounts = new int[] { 0, 0 } },
-                ["poweredwaterpurifier.deployed"] = new EntityConfig() { InputSlots = new int[] { 1 } },
-                ["pressurepad.deployed"] = new EntityConfig(),
-                ["reactivetarget_deployed"] = new EntityConfig(),
-                ["rfbroadcaster"] = new EntityConfig(),
-                ["rfreceiver"] = new EntityConfig(),
-                ["sam_site_turret_deployed"] = new EntityConfig(),
-                ["searchlight.deployed"] = new EntityConfig(),
-                ["sign.neon.125x125"] = new EntityConfig(),
-                ["sign.neon.125x215"] = new EntityConfig(),
-                ["sign.neon.125x215.animated"] = new EntityConfig(),
-                ["sign.neon.xl"] = new EntityConfig(),
-                ["sign.neon.xl.animated"] = new EntityConfig(),
-                ["simplelight"] = new EntityConfig(),
-                ["smallrechargablebattery.deployed"] = new EntityConfig(),
-                ["smartalarm"] = new EntityConfig(),
-                ["smartswitch"] = new EntityConfig(),
-                ["splitter"] = new EntityConfig(),
-                ["storagemonitor.deployed"] = new EntityConfig(),
-                ["switch"] = new EntityConfig(),
-                ["telephone.deployed"] = new EntityConfig(),
-                ["teslacoil.deployed"] = new EntityConfig(),
-                ["timer"] = new EntityConfig(),
-                ["water.pump.deployed"] = new EntityConfig(),
-                ["xmas.advanced.lights.deployed"] = new EntityConfig(),
-                ["xorswitch.entity"] = new EntityConfig() { InputSlots = new int[] { 0, 1 }, PowerAmounts = new int[] { 0, 0 } },
+
+                ["fluidswitch"] = new EntityConfig()
+                {
+                    InputSlots = new int[] { 2 }
+                },
+
+                // Has no pickup entity.
+                ["microphonestandio.entity"] = new EntityConfig(),
+
+                ["orswitch.entity"] = new EntityConfig()
+                {
+                    InputSlots = new int[] { 0, 1 },
+                    PowerAmounts = new int[] { 0, 0 }
+                },
+
+                ["poweredwaterpurifier.deployed"] = new EntityConfig()
+                {
+                    InputSlots = new int[] { 1 }
+                },
+
+                ["xorswitch.entity"] = new EntityConfig()
+                {
+                    InputSlots = new int[] { 0, 1 },
+                    PowerAmounts = new int[] { 0, 0 }
+                },
             };
         }
 
@@ -401,6 +479,7 @@ namespace Oxide.Plugins
             catch
             {
                 LogWarning($"Configuration file {Name}.json is invalid; using defaults");
+                _isConfigValid = false;
                 LoadDefaultConfig();
             }
         }
