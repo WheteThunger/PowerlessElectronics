@@ -6,6 +6,8 @@
 - Optionally only applies to entities deployed by players with permissions, configurable per entity type
 - Designed to work with circuits, so inputs with a wire in them are ignored
 
+Note: This plugin does **not** allow altering power consumption itself, nor does it allow altering power generation of vanilla generators such as solar panels.
+
 ## Installation
 
 1. Add the plugin to the `oxide/plugins` directory of your Rust server installation
