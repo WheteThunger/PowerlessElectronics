@@ -60,6 +60,9 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.fluidswitch`
 - `powerlesselectronics.hbhfsensor`
 - `powerlesselectronics.igniter`
+- `powerlesselectronics.industrial.wall.lamp`
+- `powerlesselectronics.industrial.wall.lamp.green`
+- `powerlesselectronics.industrial.wall.lamp.red`
 - `powerlesselectronics.laserdetector`
 - `powerlesselectronics.laserlight`
 - `powerlesselectronics.large.rechargable.battery`
@@ -213,6 +216,18 @@ Default configuration (no entities provide free power):
       "PowerAmount": 0
     },
     "igniter.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "industrial.wall.lamp.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "industrial.wall.lamp.green.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "industrial.wall.lamp.red.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
@@ -399,6 +414,9 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `fluidswitch`: 1
 - `hbhfsensor.deployed`: 2+
 - `igniter.deployed`: 2
+- `industrial.wall.lamp.deployed`: 1
+- `industrial.wall.lamp.green.deployed`: 1
+- `industrial.wall.lamp.red.deployed`: 1
 - `laserdetector`: 2+
 - `laserlight.deployed`: 1+
 - `microphonestandio`: 1+
