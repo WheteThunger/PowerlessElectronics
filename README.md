@@ -401,6 +401,7 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `discofloor.deployed`: 1+
 - `discofloor.largetiles.deployed`: 1+
 - `doorcontroller.deployed`: 1+
+- `electricfurnace.io`: 3
 - `electric.flasherlight.deployed`: 1
 - `electric.sirenlight.deployed`: 1
 - `electrical.blocker.deployed`: 2+
@@ -417,6 +418,8 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `industrial.wall.lamp.deployed`: 1
 - `industrial.wall.lamp.green.deployed`: 1
 - `industrial.wall.lamp.red.deployed`: 1
+- `industrialconveyor.deployed`: 1
+- `industrialcrafter.deployed`: 1
 - `laserdetector`: 2+
 - `laserlight.deployed`: 1+
 - `microphonestandio`: 1+

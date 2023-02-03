@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.1.0")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.2.0")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -98,9 +98,11 @@ namespace Oxide.Plugins
         private static bool ShouldIngoreEntity(IOEntity ioEntity)
         {
             // Parented entities are assumed to be controlled by other plugins that can manage power themselves
-            // Exception being elevator io entities and storage monitors which are parented in vanilla
+            // Exception being entities that are parented in vanilla
             if (ioEntity.HasParent()
+                && !(ioEntity is ElectricFurnaceIO)
                 && !(ioEntity is ElevatorIOEntity)
+                && !(ioEntity is IndustrialCrafter)
                 && !(ioEntity is MicrophoneStandIOEntity)
                 && !(ioEntity is StorageMonitor))
                 return true;
@@ -203,6 +205,14 @@ namespace Oxide.Plugins
                 // Has audio input only
                 "connectedspeaker.deployed",
                 "soundlight.deployed",
+
+                // Static entity
+                "caboose_xorswitchs",
+
+                // Has no power input
+                "fogmachine",
+                "snowmachine",
+                "strobelight",
             };
 
             private static bool HasElectricalInput(IOEntity ioEntity)
@@ -297,26 +307,37 @@ namespace Oxide.Plugins
                 // Has no pickup entity.
                 ["elevatorioentity"] = new EntityConfig(),
 
-                ["fluidswitch"] = new EntityConfig()
+                ["fluidswitch"] = new EntityConfig
                 {
                     InputSlots = new int[] { 2 }
                 },
 
+                ["industrialconveyor.deployed"] = new EntityConfig
+                {
+                    InputSlots = new int[] { 1 }
+                },
+
+                ["industrialcrafter.deployed"] = new EntityConfig
+                {
+                    InputSlots = new int[] { 1 }
+                },
+
                 // Has no pickup entity.
                 ["microphonestandio.entity"] = new EntityConfig(),
+                ["electricfurnace.io"] = new EntityConfig(),
 
-                ["orswitch.entity"] = new EntityConfig()
+                ["orswitch.entity"] = new EntityConfig
                 {
                     InputSlots = new int[] { 0, 1 },
                     PowerAmounts = new int[] { 0, 0 }
                 },
 
-                ["poweredwaterpurifier.deployed"] = new EntityConfig()
+                ["poweredwaterpurifier.deployed"] = new EntityConfig
                 {
                     InputSlots = new int[] { 1 }
                 },
 
-                ["xorswitch.entity"] = new EntityConfig()
+                ["xorswitch.entity"] = new EntityConfig
                 {
                     InputSlots = new int[] { 0, 1 },
                     PowerAmounts = new int[] { 0, 0 }
@@ -386,7 +407,7 @@ namespace Oxide.Plugins
 
         #endregion
 
-        #region Configuration Boilerplate
+        #region Configuration Helpers
 
         private class SerializableConfiguration
         {
