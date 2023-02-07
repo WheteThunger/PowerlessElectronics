@@ -38,50 +38,53 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.andswitch`
 - `powerlesselectronics.audioalarm`
 - `powerlesselectronics.autoturret`
+- `powerlesselectronics.blocker`
 - `powerlesselectronics.boombox`
+- `powerlesselectronics.branch`
 - `powerlesselectronics.button`
 - `powerlesselectronics.cctv`
 - `powerlesselectronics.ceilinglight`
+- `powerlesselectronics.combiner`
 - `powerlesselectronics.counter`
 - `powerlesselectronics.discoball`
-- `powerlesselectronics.discofloor`
 - `powerlesselectronics.discofloor.largetiles`
+- `powerlesselectronics.discofloor`
 - `powerlesselectronics.doorcontroller`
-- `powerlesselectronics.flasherlight`
-- `powerlesselectronics.sirenlight`
-- `powerlesselectronics.blocker`
-- `powerlesselectronics.branch`
-- `powerlesselectronics.combiner`
-- `powerlesselectronics.heater`
-- `powerlesselectronics.memorycell`
-- `powerlesselectronics.modularcarlift`
-- `powerlesselectronics.random.switch`
+- `powerlesselectronics.electricfurnace.io`
 - `powerlesselectronics.elevatorioentity`
+- `powerlesselectronics.flasherlight`
 - `powerlesselectronics.fluidswitch`
 - `powerlesselectronics.hbhfsensor`
+- `powerlesselectronics.heater`
 - `powerlesselectronics.igniter`
-- `powerlesselectronics.industrial.wall.lamp`
 - `powerlesselectronics.industrial.wall.lamp.green`
 - `powerlesselectronics.industrial.wall.lamp.red`
+- `powerlesselectronics.industrial.wall.lamp`
+- `powerlesselectronics.industrialconveyor`
+- `powerlesselectronics.industrialcrafter`
+- `powerlesselectronics.large.rechargable.battery`
 - `powerlesselectronics.laserdetector`
 - `powerlesselectronics.laserlight`
-- `powerlesselectronics.large.rechargable.battery`
 - `powerlesselectronics.medium.rechargable.battery`
+- `powerlesselectronics.memorycell`
 - `powerlesselectronics.microphonestandio`
+- `powerlesselectronics.modularcarlift`
 - `powerlesselectronics.orswitch`
 - `powerlesselectronics.poweredwaterpurifier`
 - `powerlesselectronics.pressurepad`
+- `powerlesselectronics.random.switch`
 - `powerlesselectronics.reactivetarget`
 - `powerlesselectronics.rfbroadcaster`
 - `powerlesselectronics.rfreceiver`
 - `powerlesselectronics.sam_site_turret`
 - `powerlesselectronics.searchlight`
 - `powerlesselectronics.sign.neon.125x125`
-- `powerlesselectronics.sign.neon.125x215`
 - `powerlesselectronics.sign.neon.125x215.animated`
-- `powerlesselectronics.sign.neon.xl`
+- `powerlesselectronics.sign.neon.125x215`
 - `powerlesselectronics.sign.neon.xl.animated`
+- `powerlesselectronics.sign.neon.xl`
 - `powerlesselectronics.simplelight`
+- `powerlesselectronics.sirenlight`
 - `powerlesselectronics.smallrechargablebattery`
 - `powerlesselectronics.smartalarm`
 - `powerlesselectronics.smartswitch`
@@ -200,6 +203,10 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "electricfurnace.io": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "elevatorioentity": {
       "RequirePermission": false,
       "PowerAmount": 0
@@ -229,6 +236,20 @@ Default configuration (no entities provide free power):
     },
     "industrial.wall.lamp.red.deployed": {
       "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "industrialconveyor.deployed": {
+      "RequirePermission": false,
+      "InputSlots": [
+        1
+      ],
+      "PowerAmount": 0
+    },
+    "industrialcrafter.deployed": {
+      "RequirePermission": false,
+      "InputSlots": [
+        1
+      ],
       "PowerAmount": 0
     },
     "large.rechargable.battery.deployed": {
