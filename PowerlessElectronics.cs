@@ -207,7 +207,7 @@ namespace Oxide.Plugins
                 "soundlight.deployed",
 
                 // Static entity
-                "caboose_xorswitchs",
+                "caboose_xorswitch",
 
                 // Has no power input
                 "fogmachine",
