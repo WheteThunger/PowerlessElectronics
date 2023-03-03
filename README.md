@@ -72,6 +72,7 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.orswitch`
 - `powerlesselectronics.poweredwaterpurifier`
 - `powerlesselectronics.pressurepad`
+- `powerlesselectronics.ptz_cctv`
 - `powerlesselectronics.random.switch`
 - `powerlesselectronics.reactivetarget`
 - `powerlesselectronics.rfbroadcaster`
@@ -294,6 +295,10 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "ptz_cctv_deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "reactivetarget_deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
@@ -415,7 +420,7 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `autoturret_deployed`: 10+
 - `button`: 2+
 - `boombox.deployed`: 1+
-- `cctv_deployed`: 5
+- `cctv_deployed`: 3
 - `ceilinglight.deployed`: 2
 - `counter`: 1+
 - `discoball.deployed`: 1+
@@ -447,6 +452,7 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `orswitch.entity`: 2+, 2+
 - `poweredwaterpurifier.deployed`: 5
 - `pressurepad.deployed`: 2+
+- `ptz_cctv_deployed`: 3
 - `reactivetarget_deployed`: 2+
 - `rfbroadcaster`: 1
 - `rfreceiver`: 2+
@@ -498,10 +504,10 @@ Parented entities are already ignored by this plugin, so plugin conflicts are un
 
 #### OnPowerlessInputUpdate
 
+```csharp
+object OnPowerlessInputUpdate(IOEntity ioEntity, int inputSlot, int powerAmount)
+```
+
 - Called when this plugin is about to provide power for a particular entity's empty input slot
 - Returning `false` will prevent this plugin from affecting the entity
 - Returning `null` will result in the default behavior
-
-```csharp
-bool? OnPowerlessInputUpdate(IOEntity ioEntity, int inputSlot, int powerAmount)
-```
