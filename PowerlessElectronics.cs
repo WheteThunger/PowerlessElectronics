@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.2.1")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.2.2")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -30,7 +30,7 @@ namespace Oxide.Plugins
         private void OnServerInitialized()
         {
             // Don't overwrite the config if invalid since the user will lose their config!
-            if (_config.UsingDefaults)
+            if (!_config.UsingDefaults)
             {
                 var addedPrefabs = _config.AddMissingPrefabs();
                 if (addedPrefabs != null)
