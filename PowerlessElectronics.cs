@@ -116,11 +116,6 @@ namespace Oxide.Plugins
 
         private static void MaybeProvidePower(IOEntity ioEntity, EntityConfig entityConfig)
         {
-            // This is placed here instead of in the calling method in case it needs to be delayed
-            // Since many IO entities may be parented after spawn to work around the rendering bug
-            if (ShouldIgnoreEntity(ioEntity))
-                return;
-
             foreach (var inputSlot in entityConfig.InputSlots)
             {
                 var powerAmount = entityConfig.GetPowerForSlot(inputSlot);
@@ -184,6 +179,10 @@ namespace Oxide.Plugins
                 NextTick(() =>
                 {
                     if (ioEntity2 == null)
+                        return;
+
+                    // This check is delayed since entities may be parented after spawn to work around rendering issues
+                    if (ShouldIgnoreEntity(ioEntity2))
                         return;
 
                     MaybeProvidePower(ioEntity2, entityConfig2);
