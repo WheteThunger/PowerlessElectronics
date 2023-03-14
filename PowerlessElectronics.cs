@@ -81,15 +81,29 @@ namespace Oxide.Plugins
             return hookResult is bool && (bool)hookResult == false;
         }
 
+        private static bool IsHybridIOEntity(IOEntity ioEntity)
+        {
+            return ioEntity is ElectricFurnaceIO
+                || ioEntity is ElevatorIOEntity
+                || ioEntity is MicrophoneStandIOEntity;
+        }
+
+        private static BaseEntity GetOwnerEntity(IOEntity ioEntity)
+        {
+            var parent = ioEntity.GetParentEntity();
+            if ((object)parent == null)
+                return ioEntity;
+
+            return IsHybridIOEntity(ioEntity) ? parent : ioEntity;
+        }
+
         private static bool ShouldIgnoreEntity(IOEntity ioEntity)
         {
             // Parented entities are assumed to be controlled by other plugins that can manage power themselves
             // Exception being entities that are parented in vanilla
             if (ioEntity.HasParent()
-                && !(ioEntity is ElectricFurnaceIO)
-                && !(ioEntity is ElevatorIOEntity)
+                && !IsHybridIOEntity(ioEntity)
                 && !(ioEntity is IndustrialCrafter)
-                && !(ioEntity is MicrophoneStandIOEntity)
                 && !(ioEntity is StorageMonitor))
                 return true;
 
@@ -181,15 +195,16 @@ namespace Oxide.Plugins
             }
         }
 
-        private bool EntityOwnerHasPermission(BaseEntity entity, EntityConfig entityConfig)
+        private bool EntityOwnerHasPermission(IOEntity ioEntity, EntityConfig entityConfig)
         {
             if (!entityConfig.RequirePermission)
                 return true;
 
-            if (entity.OwnerID == 0)
+            var ownerEntity = GetOwnerEntity(ioEntity);
+            if (ownerEntity.OwnerID == 0)
                 return false;
 
-            var ownerIdString = entity.OwnerID.ToString();
+            var ownerIdString = ownerEntity.OwnerID.ToString();
             return permission.UserHasPermission(ownerIdString, PermissionAll)
                 || permission.UserHasPermission(ownerIdString, entityConfig.PermissionName);
         }
