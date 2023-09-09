@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.2.2")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.2.3")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -85,7 +85,8 @@ namespace Oxide.Plugins
         {
             return ioEntity is ElectricFurnaceIO
                 || ioEntity is ElevatorIOEntity
-                || ioEntity is MicrophoneStandIOEntity;
+                || ioEntity is MicrophoneStandIOEntity
+                || (ioEntity is SimpleLight && ioEntity.GetParentEntity() is WeaponRack);
         }
 
         private static BaseEntity GetOwnerEntity(IOEntity ioEntity)
