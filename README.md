@@ -96,6 +96,8 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.teslacoil`
 - `powerlesselectronics.timer`
 - `powerlesselectronics.water.pump`
+- `powerlesselectronics.weaponracklight`
+- `powerlesselectronics.weaponracklightdouble`
 - `powerlesselectronics.xmas.advanced.lights`
 - `powerlesselectronics.xorswitch`
 
@@ -383,6 +385,14 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "weaponracklight": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "weaponracklightdouble": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "xmas.advanced.lights.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
@@ -473,6 +483,8 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `teslacoil.deployed`: 1-35
 - `timer`: 2+
 - `water.pump.deployed`: 5
+- `weaponracklight`: 1
+- `weaponracklightdouble`: 1
 - `xmas.advanced.lights.deployed`: 5
 - `xorswitch.entity`: 1+
 
