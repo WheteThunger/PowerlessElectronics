@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.2.3")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.2.4")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -117,6 +117,9 @@ namespace Oxide.Plugins
 
         private static void MaybeProvidePower(IOEntity ioEntity, EntityConfig entityConfig)
         {
+            if (ShouldIgnoreEntity(ioEntity))
+                return;
+
             foreach (var inputSlot in entityConfig.InputSlots)
             {
                 var powerAmount = entityConfig.GetPowerForSlot(inputSlot);
@@ -180,10 +183,6 @@ namespace Oxide.Plugins
                 NextTick(() =>
                 {
                     if (ioEntity2 == null)
-                        return;
-
-                    // This check is delayed since entities may be parented after spawn to work around rendering issues
-                    if (ShouldIgnoreEntity(ioEntity2))
                         return;
 
                     MaybeProvidePower(ioEntity2, entityConfig2);
