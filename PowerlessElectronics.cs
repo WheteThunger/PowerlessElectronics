@@ -105,7 +105,8 @@ namespace Oxide.Plugins
             if (ioEntity.HasParent()
                 && !IsHybridIOEntity(ioEntity)
                 && !(ioEntity is IndustrialCrafter)
-                && !(ioEntity is StorageMonitor))
+                && !(ioEntity is StorageMonitor)
+                && !(ioEntity is DoorManipulator))
                 return true;
 
             // Turrets and sam sites with switches on them are assumed to be controlled by other plugins
