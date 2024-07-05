@@ -79,6 +79,7 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.rfreceiver`
 - `powerlesselectronics.sam_site_turret`
 - `powerlesselectronics.searchlight`
+- `powerlesselectronics.seismicsensor`
 - `powerlesselectronics.sign.neon.125x125`
 - `powerlesselectronics.sign.neon.125x215.animated`
 - `powerlesselectronics.sign.neon.125x215`
@@ -164,6 +165,10 @@ Default configuration (no entities provide free power):
       "PowerAmount": 0
     },
     "electric.flasherlight.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.seismicsensor.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
@@ -439,6 +444,7 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `doorcontroller.deployed`: 1+
 - `electricfurnace.io`: 3
 - `electric.flasherlight.deployed`: 1
+- `electric.seismicsensor.deployed`: 1+
 - `electric.sirenlight.deployed`: 1
 - `electrical.blocker.deployed`: 2+
 - `electrical.branch.deployed`: 4+

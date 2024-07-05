@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.2.4")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.2.5")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -222,7 +222,8 @@ namespace Oxide.Plugins
         [JsonObject(MemberSerialization.OptIn)]
         private class Configuration : BaseConfiguration
         {
-            private static readonly string[] IgnoredEntities = {
+            private static readonly string[] IgnoredEntities =
+            {
                 // Has inputs to move the lift but does not consume power (elevatorioentity is the right one).
                 "elevator",
 
@@ -238,6 +239,7 @@ namespace Oxide.Plugins
 
                 // Has no power input
                 "fogmachine",
+                "spookyspeaker",
                 "snowmachine",
                 "strobelight",
             };
