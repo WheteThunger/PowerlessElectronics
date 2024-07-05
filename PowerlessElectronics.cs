@@ -77,16 +77,13 @@ namespace Oxide.Plugins
 
         private static bool InputUpdateWasBlocked(IOEntity ioEntity, int inputSlot, int amount)
         {
-            var hookResult = Interface.CallHook("OnPowerlessInputUpdate", inputSlot, ioEntity, amount);
-            return hookResult is bool && (bool)hookResult == false;
+            return Interface.CallHook("OnPowerlessInputUpdate", inputSlot, ioEntity, amount) is false;
         }
 
         private static bool IsHybridIOEntity(IOEntity ioEntity)
         {
-            return ioEntity is ElectricFurnaceIO
-                || ioEntity is ElevatorIOEntity
-                || ioEntity is MicrophoneStandIOEntity
-                || (ioEntity is SimpleLight && ioEntity.GetParentEntity() is WeaponRack);
+            return ioEntity is ElectricFurnaceIO or ElevatorIOEntity or MicrophoneStandIOEntity
+                   || (ioEntity is SimpleLight && ioEntity.GetParentEntity() is WeaponRack);
         }
 
         private static BaseEntity GetOwnerEntity(IOEntity ioEntity)
@@ -110,7 +107,7 @@ namespace Oxide.Plugins
                 return true;
 
             // Turrets and sam sites with switches on them are assumed to be controlled by other plugins
-            if ((ioEntity is AutoTurret || ioEntity is SamSite) && GetChildEntity<ElectricSwitch>(ioEntity) != null)
+            if (ioEntity is AutoTurret or SamSite && GetChildEntity<ElectricSwitch>(ioEntity) != null)
                 return true;
 
             return false;
@@ -167,10 +164,7 @@ namespace Oxide.Plugins
             var entityConfig = GetEntityConfig(ioEntity);
 
             // Entity not supported
-            if (entityConfig == null)
-                return;
-
-            if (!entityConfig.Enabled)
+            if (entityConfig is not { Enabled: true })
                 return;
 
             if (!EntityOwnerHasPermission(ioEntity, entityConfig))
@@ -215,8 +209,7 @@ namespace Oxide.Plugins
 
         private EntityConfig GetEntityConfig(IOEntity ioEntity)
         {
-            EntityConfig entityConfig;
-            return _config.Entities.TryGetValue(ioEntity.ShortPrefabName, out entityConfig) ? entityConfig : null;
+            return _config.Entities.TryGetValue(ioEntity.ShortPrefabName, out var entityConfig) ? entityConfig : null;
         }
 
         [JsonObject(MemberSerialization.OptIn)]
@@ -256,18 +249,18 @@ namespace Oxide.Plugins
             }
 
             [JsonProperty("Entities")]
-            public Dictionary<string, EntityConfig> Entities = new Dictionary<string, EntityConfig>()
+            public Dictionary<string, EntityConfig> Entities = new()
             {
-                ["andswitch.entity"] = new EntityConfig()
+                ["andswitch.entity"] = new EntityConfig
                 {
                     InputSlots = new[] { 0, 1 },
-                    PowerAmounts = new[] { 0, 0 }
+                    PowerAmounts = new[] { 0, 0 },
                 },
 
-                ["electrical.combiner.deployed"] = new EntityConfig()
+                ["electrical.combiner.deployed"] = new EntityConfig
                 {
                     InputSlots = new[] { 0, 1 },
-                    PowerAmounts = new[] { 0, 0 }
+                    PowerAmounts = new[] { 0, 0 },
                 },
 
                 // Has no pickup entity.
@@ -278,17 +271,17 @@ namespace Oxide.Plugins
 
                 ["fluidswitch"] = new EntityConfig
                 {
-                    InputSlots = new[] { 2 }
+                    InputSlots = new[] { 2 },
                 },
 
                 ["industrialconveyor.deployed"] = new EntityConfig
                 {
-                    InputSlots = new[] { 1 }
+                    InputSlots = new[] { 1 },
                 },
 
                 ["industrialcrafter.deployed"] = new EntityConfig
                 {
-                    InputSlots = new[] { 1 }
+                    InputSlots = new[] { 1 },
                 },
 
                 // Has no pickup entity.
@@ -298,18 +291,18 @@ namespace Oxide.Plugins
                 ["orswitch.entity"] = new EntityConfig
                 {
                     InputSlots = new[] { 0, 1 },
-                    PowerAmounts = new[] { 0, 0 }
+                    PowerAmounts = new[] { 0, 0 },
                 },
 
                 ["poweredwaterpurifier.deployed"] = new EntityConfig
                 {
-                    InputSlots = new[] { 1 }
+                    InputSlots = new[] { 1 },
                 },
 
                 ["xorswitch.entity"] = new EntityConfig
                 {
                     InputSlots = new[] { 0, 1 },
-                    PowerAmounts = new[] { 0, 0 }
+                    PowerAmounts = new[] { 0, 0 },
                 },
             };
 
@@ -323,8 +316,7 @@ namespace Oxide.Plugins
                     if (ioEntity == null || string.IsNullOrEmpty(ioEntity.ShortPrefabName))
                         continue;
 
-                    EntityConfig entityConfig;
-                    if (Entities.TryGetValue(ioEntity.ShortPrefabName, out entityConfig))
+                    if (Entities.TryGetValue(ioEntity.ShortPrefabName, out _))
                         continue;
 
                     if (!HasElectricalInput(ioEntity)
@@ -411,9 +403,9 @@ namespace Oxide.Plugins
             {
                 get
                 {
-                    for (var i = 0; i < InputSlots.Length; i++)
+                    foreach (var slot in InputSlots)
                     {
-                        if (GetPowerForSlot(InputSlots[i]) > 0)
+                        if (GetPowerForSlot(slot) > 0)
                             return true;
                     }
 
@@ -438,9 +430,7 @@ namespace Oxide.Plugins
             }
         }
 
-        private Configuration GetDefaultConfig() => new Configuration();
-
-        #endregion
+        private Configuration GetDefaultConfig() => new();
 
         #region Configuration Helpers
 
@@ -485,17 +475,14 @@ namespace Oxide.Plugins
 
         private bool MaybeUpdateConfigDict(Dictionary<string, object> currentWithDefaults, Dictionary<string, object> currentRaw)
         {
-            bool changed = false;
+            var changed = false;
 
             foreach (var key in currentWithDefaults.Keys)
             {
-                object currentRawValue;
-                if (currentRaw.TryGetValue(key, out currentRawValue))
+                if (currentRaw.TryGetValue(key, out var currentRawValue))
                 {
-                    var defaultDictValue = currentWithDefaults[key] as Dictionary<string, object>;
                     var currentDictValue = currentRawValue as Dictionary<string, object>;
-
-                    if (defaultDictValue != null)
+                    if (currentWithDefaults[key] is Dictionary<string, object> defaultDictValue)
                     {
                         if (currentDictValue == null)
                         {
@@ -503,7 +490,9 @@ namespace Oxide.Plugins
                             changed = true;
                         }
                         else if (MaybeUpdateConfigDict(defaultDictValue, currentDictValue))
+                        {
                             changed = true;
+                        }
                     }
                 }
                 else
@@ -548,6 +537,8 @@ namespace Oxide.Plugins
             Log($"Configuration changes saved to {Name}.json");
             Config.WriteObject(_config, true);
         }
+
+        #endregion
 
         #endregion
     }
