@@ -41,22 +41,31 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.blocker`
 - `powerlesselectronics.boombox`
 - `powerlesselectronics.branch`
+- `powerlesselectronics.bulbstringlights`
 - `powerlesselectronics.button`
 - `powerlesselectronics.cctv`
 - `powerlesselectronics.ceilinglight`
+- `powerlesselectronics.chandelier`
 - `powerlesselectronics.combiner`
 - `powerlesselectronics.counter`
+- `powerlesselectronics.digitalclock`
 - `powerlesselectronics.discoball`
 - `powerlesselectronics.discofloor.largetiles`
 - `powerlesselectronics.discofloor`
 - `powerlesselectronics.doorcontroller`
 - `powerlesselectronics.electricfurnace.io`
 - `powerlesselectronics.elevatorioentity`
+- `powerlesselectronics.fairylights`
 - `powerlesselectronics.flasherlight`
 - `powerlesselectronics.fluidswitch`
+- `powerlesselectronics.fluorescentlight.ceiling`
+- `powerlesselectronics.fluorescentlight`
+- `powerlesselectronics.fridge`
 - `powerlesselectronics.hbhfsensor`
 - `powerlesselectronics.heater`
+- `powerlesselectronics.hopper`
 - `powerlesselectronics.igniter`
+- `powerlesselectronics.industrial.wall.lamp.blue`
 - `powerlesselectronics.industrial.wall.lamp.green`
 - `powerlesselectronics.industrial.wall.lamp.red`
 - `powerlesselectronics.industrial.wall.lamp`
@@ -78,6 +87,7 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.rfbroadcaster`
 - `powerlesselectronics.rfreceiver`
 - `powerlesselectronics.sam_site_turret`
+- `powerlesselectronics.sculpture.ice`
 - `powerlesselectronics.searchlight`
 - `powerlesselectronics.seismicsensor`
 - `powerlesselectronics.sign.neon.125x125`
@@ -91,11 +101,16 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.smartalarm`
 - `powerlesselectronics.smartswitch`
 - `powerlesselectronics.splitter`
+- `powerlesselectronics.spotlight.tripod`
+- `powerlesselectronics.spotlight`
 - `powerlesselectronics.storagemonitor`
 - `powerlesselectronics.switch`
+- `powerlesselectronics.tablelamp`
 - `powerlesselectronics.telephone`
 - `powerlesselectronics.teslacoil`
 - `powerlesselectronics.timer`
+- `powerlesselectronics.vendingmachine`
+- `powerlesselectronics.wallcabinet`
 - `powerlesselectronics.water.pump`
 - `powerlesselectronics.weaponracklight`
 - `powerlesselectronics.weaponracklightdouble`
@@ -164,7 +179,31 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "electric.bulbstringlights.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.chandelier.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.digitalclock.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.fairylights.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "electric.flasherlight.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.fluorescentlight.ceiling.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.fluorescentlight.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
@@ -173,6 +212,22 @@ Default configuration (no entities provide free power):
       "PowerAmount": 0
     },
     "electric.sirenlight.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.spotlight.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.spotlight.tripod.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.tablelamp.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "electric.wallcabinet.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
@@ -226,11 +281,23 @@ Default configuration (no entities provide free power):
       ],
       "PowerAmount": 0
     },
+    "fridge.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "hbhfsensor.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "hopper.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "igniter.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
+    "industrial.wall.lamp.blue.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
     },
@@ -322,6 +389,10 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "sculpture.ice.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "searchlight.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
@@ -386,6 +457,10 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "vendingmachine.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0
+    },
     "water.pump.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
@@ -433,8 +508,8 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `andswitch.entity`: 2+, 2+
 - `audioalarm`: 1
 - `autoturret_deployed`: 10+
-- `button`: 2+
 - `boombox.deployed`: 1+
+- `button`: 2+
 - `cctv_deployed`: 3
 - `ceilinglight.deployed`: 2
 - `counter`: 1+
@@ -442,10 +517,19 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `discofloor.deployed`: 1+
 - `discofloor.largetiles.deployed`: 1+
 - `doorcontroller.deployed`: 1+
-- `electricfurnace.io`: 3
+- `electric.bulbstringlights.deployed`: 5
+- `electric.chandelier.deployed`: 4
+- `electric.digitalclock.deployed`: 1
+- `electric.fairylights.deployed`: 5
 - `electric.flasherlight.deployed`: 1
+- `electric.fluorescentlight.ceiling.deployed`: 2
+- `electric.fluorescentlight.deployed`: 1
 - `electric.seismicsensor.deployed`: 1+
 - `electric.sirenlight.deployed`: 1
+- `electric.spotlight.deployed`: 5
+- `electric.spotlight.tripod.deployed`: 5
+- `electric.tablelamp.deployed`: 1
+- `electric.wallcabinet.deployed`: 1
 - `electrical.blocker.deployed`: 2+
 - `electrical.branch.deployed`: 4+
 - `electrical.combiner.deployed`: 1+, 1+
@@ -453,10 +537,14 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `electrical.memorycell.deployed`: 1+
 - `electrical.modularcarlift.deployed`: 5
 - `electrical.random.switch.deployed`: 2+
+- `electricfurnace.io`: 3
 - `elevatorioentity`: 5
 - `fluidswitch`: 1
+- `fridge.deployed`: 5
 - `hbhfsensor.deployed`: 2+
+- `hopper`: 8
 - `igniter.deployed`: 2
+- `industrial.wall.lamp.blue.deployed`: 1
 - `industrial.wall.lamp.deployed`: 1
 - `industrial.wall.lamp.green.deployed`: 1
 - `industrial.wall.lamp.red.deployed`: 1
@@ -473,12 +561,13 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `rfbroadcaster`: 1
 - `rfreceiver`: 2+
 - `sam_site_turret_deployed`: 25
+- `sculpture.ice.deployed`: 1
 - `searchlight.deployed`: 10
 - `sign.neon.125x125`: 4
-- `sign.neon.125x215`: 6
 - `sign.neon.125x215.animated`: 10
-- `sign.neon.xl`: 8
+- `sign.neon.125x215`: 6
 - `sign.neon.xl.animated`: 15
+- `sign.neon.xl`: 8
 - `simplelight`: 1
 - `smartalarm`: 1
 - `smartswitch`: 2+
@@ -488,6 +577,7 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `telephone.deployed`: 1+
 - `teslacoil.deployed`: 1-35
 - `timer`: 2+
+- `vendingmachine.deployed`: 5
 - `water.pump.deployed`: 5
 - `weaponracklight`: 1
 - `weaponracklightdouble`: 1
