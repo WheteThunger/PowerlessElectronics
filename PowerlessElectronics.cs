@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.2.6")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.2.7")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -32,10 +32,15 @@ namespace Oxide.Plugins
             // Don't overwrite the config if invalid since the user will lose their config!
             if (!_config.UsingDefaults)
             {
+                var didMigratePrefabs = _config.MigratePrefabs();
                 var addedPrefabs = _config.AddMissingPrefabs();
                 if (addedPrefabs != null)
                 {
                     LogWarning($"Discovered and added {addedPrefabs.Count} electrical entity types to Configuration.\n - {string.Join("\n - ", addedPrefabs)}");
+                }
+
+                if (didMigratePrefabs || addedPrefabs != null)
+                {
                     SaveConfig();
                 }
             }
@@ -82,9 +87,8 @@ namespace Oxide.Plugins
 
         private static bool IsHybridIOEntity(IOEntity ioEntity)
         {
-            return ioEntity is ElectricFurnaceIO or ElevatorIOEntity or MicrophoneStandIOEntity
-                   || (ioEntity is SimpleLight && ioEntity.GetParentEntity() is WeaponRack)
-                   || ioEntity is Hopper;
+            return ioEntity is ElectricFurnaceIO or MicrophoneStandIOEntity or Hopper
+                || (ioEntity is SimpleLight && ioEntity.GetParentEntity() is WeaponRack);
         }
 
         private static BaseEntity GetOwnerEntity(IOEntity ioEntity)
@@ -210,17 +214,17 @@ namespace Oxide.Plugins
 
         private EntityConfig GetEntityConfig(IOEntity ioEntity)
         {
-            return _config.Entities.TryGetValue(ioEntity.ShortPrefabName, out var entityConfig) ? entityConfig : null;
+            return _config.Entities.GetValueOrDefault(ioEntity.ShortPrefabName);
         }
 
         [JsonObject(MemberSerialization.OptIn)]
         private class Configuration : BaseConfiguration
         {
+            private const string ElevatorShortPrefabName = "elevator";
+            private const string ElevatorIoEntityShortPrefabName = "elevatorioentity";
+
             private static readonly string[] IgnoredEntities =
             {
-                // Has inputs to move the lift but does not consume power (elevatorioentity is the right one).
-                "elevator",
-
                 // Has inputs to toggle on/off but does not consume power.
                 "small_fuel_generator.deployed",
 
@@ -267,8 +271,10 @@ namespace Oxide.Plugins
                 // Has no pickup entity.
                 ["electrical.modularcarlift.deployed"] = new EntityConfig(),
 
-                // Has no pickup entity.
-                ["elevatorioentity"] = new EntityConfig(),
+                [ElevatorShortPrefabName] = new EntityConfig
+                {
+                    InputSlots = new[] { 2 },
+                },
 
                 ["fluidswitch"] = new EntityConfig
                 {
@@ -343,6 +349,26 @@ namespace Oxide.Plugins
                 return addedPrefabs;
             }
 
+            public bool MigratePrefabs()
+            {
+                var didChange = false;
+
+                // Move `elevatorioentity` to `elevator`
+                if (Entities.Remove(ElevatorIoEntityShortPrefabName, out var elevatorIOEntityConfig))
+                {
+                    if (!Entities.TryGetValue(ElevatorShortPrefabName, out var elevatorConfig))
+                    {
+                        elevatorConfig = new EntityConfig { InputSlots = new[] { 2 } };
+                        Entities[ElevatorShortPrefabName] = elevatorConfig;
+                    }
+                    elevatorConfig.RequirePermission = elevatorIOEntityConfig.RequirePermission;
+                    elevatorConfig.PowerAmount = elevatorIOEntityConfig.PowerAmount;
+                    didChange = true;
+                }
+
+                return didChange;
+            }
+
             public void GeneratePermissionNames()
             {
                 foreach (var entry in Entities)
@@ -354,6 +380,12 @@ namespace Oxide.Plugins
                         .Replace(".deployed", string.Empty)
                         .Replace("_deployed", string.Empty)
                         .Replace(".entity", string.Empty);
+
+                    // Rename `elevator` to `elevatorioentity` for backwards compatibility
+                    if (entry.Value.PermissionName.EndsWith($".{ElevatorShortPrefabName}"))
+                    {
+                        entry.Value.PermissionName = entry.Value.PermissionName.Replace(ElevatorShortPrefabName, ElevatorIoEntityShortPrefabName);
+                    }
                 }
             }
 
@@ -373,7 +405,7 @@ namespace Oxide.Plugins
         }
 
         [JsonObject(MemberSerialization.OptIn)]
-        internal class EntityConfig
+        private class EntityConfig
         {
             private static readonly int[] StandardInputSlot = { 0 };
 

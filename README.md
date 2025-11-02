@@ -270,8 +270,11 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
-    "elevatorioentity": {
+    "elevator": {
       "RequirePermission": false,
+      "InputSlots": [
+        2
+      ],
       "PowerAmount": 0
     },
     "fluidswitch": {
@@ -538,7 +541,7 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `electrical.modularcarlift.deployed`: 5
 - `electrical.random.switch.deployed`: 2+
 - `electricfurnace.io`: 3
-- `elevatorioentity`: 5
+- `elevator`: 5
 - `fluidswitch`: 1
 - `fridge.deployed`: 5
 - `hbhfsensor.deployed`: 2+
