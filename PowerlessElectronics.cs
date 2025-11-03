@@ -17,6 +17,7 @@ namespace Oxide.Plugins
         private const string PermissionEntityFormat = "powerlesselectronics.{0}";
 
         private Configuration _config;
+        private HashSet<IOEntity> _modifiedEntities = new();
 
         #endregion
 
@@ -64,6 +65,21 @@ namespace Oxide.Plugins
             }
 
             Subscribe(nameof(OnEntitySpawned));
+
+            // Periodically clean up the list of modified entities to avoid memory leaks. Presumably this is less
+            // expensive than hooking OnEntityKill or attaching an object to every modified entity.
+            timer.Once(300, CleanUpModifiedEntities);
+        }
+
+        private void Unload()
+        {
+            foreach (var ioEntity in _modifiedEntities)
+            {
+                if (ioEntity == null)
+                    continue;
+
+                ResetEntityPower(ioEntity);
+            }
         }
 
         private void OnEntitySpawned(IOEntity ioEntity)
@@ -118,23 +134,6 @@ namespace Oxide.Plugins
             return false;
         }
 
-        private static void MaybeProvidePower(IOEntity ioEntity, EntityConfig entityConfig)
-        {
-            if (ShouldIgnoreEntity(ioEntity))
-                return;
-
-            foreach (var inputSlot in entityConfig.InputSlots)
-            {
-                var powerAmount = entityConfig.GetPowerForSlot(inputSlot);
-
-                // Don't update power if specified to be 0 to avoid conflicts with other plugins
-                if (powerAmount > 0 && !HasConnectedInput(ioEntity, inputSlot))
-                {
-                    TryProvidePower(ioEntity, inputSlot, powerAmount);
-                }
-            }
-        }
-
         private static T GetChildEntity<T>(BaseEntity entity) where T : BaseEntity
         {
             foreach (var child in entity.children)
@@ -153,11 +152,76 @@ namespace Oxide.Plugins
                 && ioEntity.inputs[inputSlot].connectedTo.Get() != null;
         }
 
-        private static void TryProvidePower(IOEntity ioEntity, int inputSlot, int powerAmount)
+        private static bool TryProvidePower(IOEntity ioEntity, int inputSlot, int powerAmount)
         {
             if (ioEntity.inputs.Length > inputSlot && !InputUpdateWasBlocked(ioEntity, inputSlot, powerAmount))
             {
                 ioEntity.UpdateFromInput(powerAmount, inputSlot);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void ResetEntityPower(IOEntity ioEntity)
+        {
+            var entityConfig = GetEntityConfig(ioEntity);
+            if (entityConfig == null)
+                return;
+
+            foreach (var inputSlot in entityConfig.InputSlots)
+            {
+                if (HasConnectedInput(ioEntity, inputSlot))
+                    continue;
+
+                // Reset power to 0 for in-scope input slots modified that have no connected input.
+                TryProvidePower(ioEntity, inputSlot, 0);
+            }
+        }
+
+        private void CleanUpModifiedEntities()
+        {
+            HashSet<IOEntity> entitiesToClean = null;
+
+            foreach (var modifiedEntity in _modifiedEntities)
+            {
+                if (modifiedEntity != null)
+                    continue;
+
+                entitiesToClean ??= new HashSet<IOEntity>();
+                entitiesToClean.Add(modifiedEntity);
+            }
+
+            if (entitiesToClean != null)
+            {
+                foreach (var entity in entitiesToClean)
+                {
+                    _modifiedEntities.Remove(entity);
+                }
+            }
+        }
+
+        private void MaybeProvidePower(IOEntity ioEntity, EntityConfig entityConfig)
+        {
+            if (ShouldIgnoreEntity(ioEntity))
+                return;
+
+            var didProvidePower = false;
+
+            foreach (var inputSlot in entityConfig.InputSlots)
+            {
+                var powerAmount = entityConfig.GetPowerForSlot(inputSlot);
+
+                // Don't update power if specified to be 0 to avoid conflicts with other plugins
+                if (powerAmount > 0 && !HasConnectedInput(ioEntity, inputSlot))
+                {
+                    didProvidePower |= TryProvidePower(ioEntity, inputSlot, powerAmount);
+                }
+            }
+
+            if (didProvidePower)
+            {
+                _modifiedEntities.Add(ioEntity);
             }
         }
 
