@@ -103,6 +103,7 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.splitter`
 - `powerlesselectronics.spotlight.tripod`
 - `powerlesselectronics.spotlight`
+- `powerlesselectronics.storageadaptor.deployed`
 - `powerlesselectronics.storagemonitor`
 - `powerlesselectronics.switch`
 - `powerlesselectronics.tablelamp`
@@ -440,6 +441,13 @@ Default configuration (no entities provide free power):
       "RequirePermission": false,
       "PowerAmount": 0
     },
+    "storageadaptor.deployed": {
+      "RequirePermission": false,
+      "PowerAmount": 0,
+      "InputSlots": [
+        1
+      ]
+    },
     "storagemonitor.deployed": {
       "RequirePermission": false,
       "PowerAmount": 0
@@ -576,6 +584,7 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `smartswitch`: 2+
 - `splitter`: 4+
 - `storagemonitor.deployed`: 1+
+- `storageadaptor.deployed`: 1
 - `switch`: 2+
 - `telephone.deployed`: 1+
 - `teslacoil.deployed`: 1-35

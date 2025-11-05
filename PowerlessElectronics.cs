@@ -122,9 +122,7 @@ namespace Oxide.Plugins
             // Exception being entities that are parented in vanilla
             if (ioEntity.HasParent()
                 && !IsHybridIOEntity(ioEntity)
-                && !(ioEntity is IndustrialCrafter)
-                && !(ioEntity is StorageMonitor)
-                && !(ioEntity is DoorManipulator))
+                && ioEntity is not IndustrialStorageAdaptor and not IndustrialCrafter and not StorageMonitor and not DoorManipulator)
                 return true;
 
             // Turrets and sam sites with switches on them are assumed to be controlled by other plugins
@@ -351,6 +349,11 @@ namespace Oxide.Plugins
                 },
 
                 ["industrialcrafter.deployed"] = new EntityConfig
+                {
+                    InputSlots = new[] { 1 },
+                },
+
+                ["storageadaptor.deployed"] = new EntityConfig
                 {
                     InputSlots = new[] { 1 },
                 },
