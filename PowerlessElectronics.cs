@@ -2,8 +2,11 @@
 using Newtonsoft.Json.Linq;
 using Oxide.Core;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using static IOEntity;
 
 namespace Oxide.Plugins
 {
@@ -15,9 +18,34 @@ namespace Oxide.Plugins
 
         private const string PermissionAll = "powerlesselectronics.all";
         private const string PermissionEntityFormat = "powerlesselectronics.{0}";
+        private const string ElectricSwitchPrefab = "assets/prefabs/deployable/playerioents/simpleswitch/switch.prefab";
+        private const string CodeLockDeniedEffectPrefab = "assets/prefabs/locks/keypad/effects/lock.code.denied.prefab";
+
+        private readonly object False = false;
+
+        private static readonly Vector3 TurretSwitchPosition = new(0, 0.36f, -0.32f);
+        private static readonly Quaternion TurretSwitchRotation = Quaternion.Euler(0, 180, 0);
+        private static readonly Vector3 SamSiteSwitchPosition = new(0, 0.35f, -0.95f);
+        private static readonly Quaternion SamSiteSwitchRotation = Quaternion.Euler(0, 180, 0);
+
+        private const int AutoTurretInputSlot = 0;
+        private const int SamSiteInputSlot = 0;
 
         private Configuration _config;
         private HashSet<IOEntity> _modifiedEntities = new();
+        private DynamicHookSubscriber<ElectricSwitch> _attachedSwitches;
+        private ProtectionProperties _immortalProtection;
+        private StoredData _data;
+
+        public PowerlessElectronics()
+        {
+            _attachedSwitches = new DynamicHookSubscriber<ElectricSwitch>(this,
+                nameof(OnSwitchToggle),
+                nameof(OnSwitchToggled),
+                nameof(OnWireConnect),
+                nameof(OnServerSave)
+            );
+        }
 
         #endregion
 
@@ -25,11 +53,17 @@ namespace Oxide.Plugins
 
         private void Init()
         {
+            _data = StoredData.Load();
             Unsubscribe(nameof(OnEntitySpawned));
+            _attachedSwitches.UnsubscribeAll();
         }
 
         private void OnServerInitialized()
         {
+            _immortalProtection = ScriptableObject.CreateInstance<ProtectionProperties>();
+            _immortalProtection.name = $"{Name}Protection";
+            _immortalProtection.Add(1);
+
             // Don't overwrite the config if invalid since the user will lose their config!
             if (!_config.UsingDefaults)
             {
@@ -68,11 +102,13 @@ namespace Oxide.Plugins
 
             // Periodically clean up the list of modified entities to avoid memory leaks. Presumably this is less
             // expensive than hooking OnEntityKill or attaching an object to every modified entity.
-            timer.Once(300, CleanUpModifiedEntities);
+            timer.Once(300, ForgetDestroyedEntities);
         }
 
         private void Unload()
         {
+            UnityEngine.Object.Destroy(_immortalProtection);
+
             foreach (var ioEntity in _modifiedEntities)
             {
                 if (ioEntity == null)
@@ -80,6 +116,26 @@ namespace Oxide.Plugins
 
                 ResetEntityPower(ioEntity);
             }
+
+            _data.SaveEntitiesSwitchedOn(_attachedSwitches);
+
+            foreach (var electricSwitch in _attachedSwitches)
+            {
+                if (electricSwitch == null)
+                    continue;
+
+                electricSwitch.Kill();
+            }
+        }
+
+        private void OnServerSave()
+        {
+            _data.SaveEntitiesSwitchedOn(_attachedSwitches);
+        }
+
+        private void OnNewSave()
+        {
+            _data = StoredData.Reset();
         }
 
         private void OnEntitySpawned(IOEntity ioEntity)
@@ -87,9 +143,88 @@ namespace Oxide.Plugins
             ProcessIOEntity(ioEntity, delay: true);
         }
 
-        private void OnIORefCleared(IOEntity.IORef ioRef, IOEntity ioEntity)
+        private void OnIORefCleared(IORef ioRef, IOEntity ioEntity)
         {
             ProcessIOEntity(ioEntity, delay: true);
+        }
+
+        // Only subscribed while there are attached switches.
+        // Require players to have building permission to toggle attached switches.
+        private object OnSwitchToggle(ElectricSwitch electricSwitch, BasePlayer player)
+        {
+            if (!_attachedSwitches.Contains(electricSwitch))
+                return null;
+
+            if (player.CanBuild())
+                return null;
+
+            Effect.server.Run(CodeLockDeniedEffectPrefab, electricSwitch, 0, Vector3.zero, Vector3.forward);
+            return False;
+        }
+
+        // Only subscribed while there are attached switches.
+        private void OnSwitchToggled(ElectricSwitch electricSwitch)
+        {
+            if (!_attachedSwitches.Contains(electricSwitch))
+                return;
+
+            var parentIoEntity = electricSwitch.GetParentEntity() as IOEntity;
+            if (parentIoEntity == null)
+                return;
+
+            if (electricSwitch.IsOn())
+            {
+                if (parentIoEntity is AutoTurret turret)
+                {
+                    var powerAmount = GetEntityConfig(turret)?.GetPowerForSlot(AutoTurretInputSlot) ?? 0;
+                    if (powerAmount >= 0)
+                    {
+                        TryProvidePower(turret, AutoTurretInputSlot, powerAmount);
+                    }
+                }
+                else if (parentIoEntity is SamSite samSite)
+                {
+                    var powerAmount = GetEntityConfig(samSite)?.GetPowerForSlot(SamSiteInputSlot) ?? 0;
+                    if (powerAmount >= 0)
+                    {
+                        TryProvidePower(samSite, SamSiteInputSlot, powerAmount);
+                    }
+                }
+            }
+            else
+            {
+                if (parentIoEntity is AutoTurret turret)
+                {
+                    TryProvidePower(turret, AutoTurretInputSlot, 0);
+                }
+                else if (parentIoEntity is SamSite samSite)
+                {
+                    TryProvidePower(samSite, SamSiteInputSlot, 0);
+                }
+            }
+        }
+
+        // Only subscribed while there are attached switches.
+        // Note: The first entity seems to always be the receiver.
+        private void OnWireConnect(BasePlayer player, IOEntity ioEntity, int slot, IOEntity otherIoEntity, int otherSlot)
+        {
+            if (_config.AddSwitchToPowerlessAutoTurrets)
+            {
+                if (ioEntity is AutoTurret turret && slot == AutoTurretInputSlot)
+                {
+                    ProcessIOEntity(turret, delay: true);
+                    return;
+                }
+            }
+
+            if (_config.AddSwitchToPowerlessSamSites)
+            {
+                if (ioEntity is SamSite samSite && slot == SamSiteInputSlot)
+                {
+                    ProcessIOEntity(samSite, delay: true);
+                    return;
+                }
+            }
         }
 
         #endregion
@@ -107,29 +242,19 @@ namespace Oxide.Plugins
                 || (ioEntity is SimpleLight && ioEntity.GetParentEntity() is WeaponRack);
         }
 
+        private static bool IsEntityNormallyParented(IOEntity ioEntity)
+        {
+            return IsHybridIOEntity(ioEntity)
+                || ioEntity is IndustrialStorageAdaptor or IndustrialCrafter or StorageMonitor or DoorManipulator;
+        }
+
         private static BaseEntity GetOwnerEntity(IOEntity ioEntity)
         {
             var parent = ioEntity.GetParentEntity();
-            if ((object)parent == null)
+            if (parent is null)
                 return ioEntity;
 
             return IsHybridIOEntity(ioEntity) ? parent : ioEntity;
-        }
-
-        private static bool ShouldIgnoreEntity(IOEntity ioEntity)
-        {
-            // Parented entities are assumed to be controlled by other plugins that can manage power themselves
-            // Exception being entities that are parented in vanilla
-            if (ioEntity.HasParent()
-                && !IsHybridIOEntity(ioEntity)
-                && ioEntity is not IndustrialStorageAdaptor and not IndustrialCrafter and not StorageMonitor and not DoorManipulator)
-                return true;
-
-            // Turrets and sam sites with switches on them are assumed to be controlled by other plugins
-            if (ioEntity is AutoTurret or SamSite && GetChildEntity<ElectricSwitch>(ioEntity) != null)
-                return true;
-
-            return false;
         }
 
         private static T GetChildEntity<T>(BaseEntity entity) where T : BaseEntity
@@ -150,15 +275,58 @@ namespace Oxide.Plugins
                 && ioEntity.inputs[inputSlot].connectedTo.Get() != null;
         }
 
-        private static bool TryProvidePower(IOEntity ioEntity, int inputSlot, int powerAmount)
+        private static void HideIOSlots(IOSlot[] slots)
         {
-            if (ioEntity.inputs.Length > inputSlot && !InputUpdateWasBlocked(ioEntity, inputSlot, powerAmount))
+            foreach (var slot in slots)
             {
-                ioEntity.UpdateFromInput(powerAmount, inputSlot);
-                return true;
+                slot.type = IOType.Generic;
+            }
+        }
+
+        private static void RemoveProblemComponents(BaseEntity entity)
+        {
+            foreach (var collider in entity.GetComponentsInChildren<Collider>())
+            {
+                UnityEngine.Object.DestroyImmediate(collider);
             }
 
+            UnityEngine.Object.DestroyImmediate(entity.GetComponent<DestroyOnGroundMissing>());
+            UnityEngine.Object.DestroyImmediate(entity.GetComponent<GroundWatch>());
+        }
+
+        private bool ShouldIgnoreEntity(IOEntity ioEntity)
+        {
+            // Parented entities are assumed to be controlled by other plugins that can manage power themselves, except
+            // entities that are normally parented in vanilla.
+            if (ioEntity.HasParent() && !IsEntityNormallyParented(ioEntity))
+                return true;
+
+            // Ignore turrets and sam sites with switches controlled by other plugins.
+            if (ioEntity is AutoTurret or SamSite
+                && GetChildEntity<ElectricSwitch>(ioEntity) is {} electricSwitch
+                && !_attachedSwitches.Contains(electricSwitch))
+                return true;
+
             return false;
+        }
+
+        private bool TryProvidePower(IOEntity ioEntity, int inputSlot, int powerAmount)
+        {
+            if (ioEntity.inputs.Length <= inputSlot || InputUpdateWasBlocked(ioEntity, inputSlot, powerAmount))
+                return false;
+
+            ioEntity.UpdateFromInput(powerAmount, inputSlot);
+
+            if (powerAmount >= 0)
+            {
+                _modifiedEntities.Add(ioEntity);
+            }
+            else
+            {
+                _modifiedEntities.Remove(ioEntity);
+            }
+
+            return true;
         }
 
         private void ResetEntityPower(IOEntity ioEntity)
@@ -172,30 +340,83 @@ namespace Oxide.Plugins
                 if (HasConnectedInput(ioEntity, inputSlot))
                     continue;
 
-                // Reset power to 0 for in-scope input slots modified that have no connected input.
+                // Reset power to 0 for in-scope input slots that have no connected input.
                 TryProvidePower(ioEntity, inputSlot, 0);
             }
         }
 
-        private void CleanUpModifiedEntities()
+        private void ForgetDestroyedEntities()
         {
-            HashSet<IOEntity> entitiesToClean = null;
+            HashSet<IOEntity> entitiesToForget = null;
 
             foreach (var modifiedEntity in _modifiedEntities)
             {
                 if (modifiedEntity != null)
                     continue;
 
-                entitiesToClean ??= new HashSet<IOEntity>();
-                entitiesToClean.Add(modifiedEntity);
+                entitiesToForget ??= new HashSet<IOEntity>();
+                entitiesToForget.Add(modifiedEntity);
             }
 
-            if (entitiesToClean != null)
+            foreach (var switchEntity in _attachedSwitches)
             {
-                foreach (var entity in entitiesToClean)
+                if (switchEntity != null)
+                    continue;
+
+                entitiesToForget ??= new HashSet<IOEntity>();
+                entitiesToForget.Add(switchEntity);
+            }
+
+            if (entitiesToForget != null)
+            {
+                foreach (var entity in entitiesToForget)
                 {
                     _modifiedEntities.Remove(entity);
+
+                    if (entity is ElectricSwitch electricSwitch)
+                    {
+                        _attachedSwitches.Remove(electricSwitch);
+                    }
                 }
+            }
+        }
+
+        private void ProvideSwitchableEntityPower(IOEntity ioEntity, EntityConfig entityConfig, Vector3 switchPosition, Quaternion switchRotation, int inputSlot)
+        {
+            var powerAmount = entityConfig.GetPowerForSlot(inputSlot);
+            if (powerAmount <= 0)
+                return;
+
+            var electricSwitch = GetChildEntity<ElectricSwitch>(ioEntity);
+            if (electricSwitch is not null && !_attachedSwitches.Contains(electricSwitch))
+                return;
+
+            if (HasConnectedInput(ioEntity, inputSlot))
+            {
+                if (electricSwitch != null && !electricSwitch.IsDestroyed)
+                {
+                    electricSwitch.Kill();
+                }
+
+                return;
+            }
+
+            // When we already have an attached switch, we rely on the OnSwitchToggled hook to manage power.
+            if (electricSwitch != null)
+                return;
+
+            electricSwitch = AttachSwitchEntity(ioEntity, switchPosition, switchRotation);
+
+            if (_data.WasEntitySwitchedOn(ioEntity))
+            {
+                // Restore the previous switch state since the plugin was reloaded.
+                electricSwitch.SetSwitch(true);
+                TryProvidePower(ioEntity, inputSlot, powerAmount);
+            }
+            else if (ioEntity.IsPowered())
+            {
+                // Update the switch state if another plugin automatically powered the entity (such as Turret Loadouts).
+                electricSwitch.SetSwitch(true);
             }
         }
 
@@ -204,7 +425,17 @@ namespace Oxide.Plugins
             if (ShouldIgnoreEntity(ioEntity))
                 return;
 
-            var didProvidePower = false;
+            if (_config.AddSwitchToPowerlessAutoTurrets && ioEntity is AutoTurret turret)
+            {
+                ProvideSwitchableEntityPower(turret, entityConfig, TurretSwitchPosition, TurretSwitchRotation, AutoTurretInputSlot);
+                return;
+            }
+
+            if (_config.AddSwitchToPowerlessSamSites && ioEntity is SamSite samSite)
+            {
+                ProvideSwitchableEntityPower(samSite, entityConfig, SamSiteSwitchPosition, SamSiteSwitchRotation, SamSiteInputSlot);
+                return;
+            }
 
             foreach (var inputSlot in entityConfig.InputSlots)
             {
@@ -213,13 +444,8 @@ namespace Oxide.Plugins
                 // Don't update power if specified to be 0 to avoid conflicts with other plugins
                 if (powerAmount > 0 && !HasConnectedInput(ioEntity, inputSlot))
                 {
-                    didProvidePower |= TryProvidePower(ioEntity, inputSlot, powerAmount);
+                    TryProvidePower(ioEntity, inputSlot, powerAmount);
                 }
-            }
-
-            if (didProvidePower)
-            {
-                _modifiedEntities.Add(ioEntity);
             }
         }
 
@@ -229,8 +455,6 @@ namespace Oxide.Plugins
                 return;
 
             var entityConfig = GetEntityConfig(ioEntity);
-
-            // Entity not supported
             if (entityConfig is not { Enabled: true })
                 return;
 
@@ -268,6 +492,149 @@ namespace Oxide.Plugins
             var ownerIdString = ownerEntity.OwnerID.ToString();
             return permission.UserHasPermission(ownerIdString, PermissionAll)
                 || permission.UserHasPermission(ownerIdString, entityConfig.PermissionName);
+        }
+
+        private ElectricSwitch AttachSwitchEntity(IOEntity parentIoEntity, Vector3 position, Quaternion rotation)
+        {
+            var electricSwitch = GameManager.server.CreateEntity(ElectricSwitchPrefab, position, rotation) as ElectricSwitch;
+            if (electricSwitch == null)
+                return null;
+
+            HideIOSlots(electricSwitch.inputs);
+            HideIOSlots(electricSwitch.outputs);
+            RemoveProblemComponents(electricSwitch);
+            electricSwitch.SetFlag(Flag_HasPower, true);
+            electricSwitch.baseProtection = _immortalProtection;
+            electricSwitch.pickup.enabled = false;
+            electricSwitch.EnableSaving(false);
+            electricSwitch.SetParent(parentIoEntity);
+            electricSwitch.Spawn();
+            _attachedSwitches.Add(electricSwitch);
+            return electricSwitch;
+        }
+
+        #endregion
+
+        #region Dynamic Hook Subscriptions
+
+        private class DynamicHookSubscriber<T> : IEnumerable<T>
+        {
+            private PowerlessElectronics _plugin;
+            private HashSet<T> _list = new();
+            private string[] _hookNames;
+
+            public DynamicHookSubscriber(PowerlessElectronics plugin, params string[] hookNames)
+            {
+                _plugin = plugin;
+                _hookNames = hookNames;
+            }
+
+            public bool Contains(T item)
+            {
+                return _list.Contains(item);
+            }
+
+            public void Add(T item)
+            {
+                if (_list.Add(item) && _list.Count == 1)
+                {
+                    SubscribeAll();
+                }
+            }
+
+            public void Remove(T item)
+            {
+                if (_list.Remove(item) && _list.Count == 0)
+                {
+                    UnsubscribeAll();
+                }
+            }
+
+            public void SubscribeAll()
+            {
+                foreach (var hookName in _hookNames)
+                {
+                    _plugin.Subscribe(hookName);
+                }
+            }
+
+            public void UnsubscribeAll()
+            {
+                foreach (var hookName in _hookNames)
+                {
+                    _plugin.Unsubscribe(hookName);
+                }
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                return _list.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        #endregion
+
+        #region Data
+
+        private class StoredData
+        {
+            [JsonProperty("EntitiesSwitchedOn", DefaultValueHandling = DefaultValueHandling.Ignore)]
+            private HashSet<ulong> EntitiesSwitchedOn = new();
+
+            public static StoredData Load()
+            {
+                return Interface.Oxide.DataFileSystem.ReadObject<StoredData>(nameof(PowerlessElectronics)) ?? new StoredData();
+            }
+
+            public static StoredData Reset()
+            {
+                return new StoredData().Save();
+            }
+
+            private StoredData Save()
+            {
+                Interface.Oxide.DataFileSystem.WriteObject(nameof(PowerlessElectronics), this);
+                return this;
+            }
+
+            public bool WasEntitySwitchedOn(IOEntity ioEntity)
+            {
+                return EntitiesSwitchedOn.Contains(ioEntity.net.ID.Value);
+            }
+
+            public void SaveEntitiesSwitchedOn(IEnumerable<ElectricSwitch> electricSwitches)
+            {
+                var didChange = false;
+
+                if (EntitiesSwitchedOn.Count > 0)
+                {
+                    EntitiesSwitchedOn.Clear();
+                    didChange = true;
+                }
+
+                foreach (var electricSwitch in electricSwitches)
+                {
+                    if (electricSwitch == null || !electricSwitch.IsOn())
+                        continue;
+
+                    var parentIoEntity = electricSwitch.GetParentEntity() as IOEntity;
+                    if (parentIoEntity == null)
+                        continue;
+
+                    EntitiesSwitchedOn.Add(parentIoEntity.net.ID.Value);
+                    didChange = true;
+                }
+
+                if (didChange)
+                {
+                    Save();
+                }
+            }
         }
 
         #endregion
@@ -308,12 +675,18 @@ namespace Oxide.Plugins
             {
                 foreach (var input in ioEntity.inputs)
                 {
-                    if (input.type == IOEntity.IOType.Electric)
+                    if (input.type == IOType.Electric)
                         return true;
                 }
 
                 return false;
             }
+
+            [JsonProperty("Add switch to powerless auto turrets")]
+            public bool AddSwitchToPowerlessAutoTurrets = false;
+
+            [JsonProperty("Add switch to powerless SAM sites")]
+            public bool AddSwitchToPowerlessSamSites = false;
 
             [JsonProperty("Entities")]
             public Dictionary<string, EntityConfig> Entities = new()

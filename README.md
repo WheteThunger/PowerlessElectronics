@@ -124,6 +124,8 @@ Default configuration (no entities provide free power):
 
 ```json
 {
+  "Add switch to powerless auto turrets": false,
+  "Add switch to powerless SAM sites": false,
   "Entities": {
     "andswitch.entity": {
       "RequirePermission": false,
@@ -502,6 +504,9 @@ Default configuration (no entities provide free power):
   }
 }
 ```
+
+- `Add switch to powerless auto turrets` (`true` or `false`) -- While `true`, a switch will be added to auto turrets that are configured to generate their own power, allowing players to turn the turret on or off. Note that the switch will be temporarily hidden while the turret has a wire connected to its power input.
+- `Add switch to powerless SAM sites` (`true` or `false`) -- While `true`, a switch will be added to SAM sites that are configured to generate their own power, allowing players to turn the SAM site on or off. Note that the switch will be temporarily hidden while the SAM site has a wire connected to its power input.
 
 Each entity type has the following configuration options, mapped in the config to the entity's prefab short name.
 
