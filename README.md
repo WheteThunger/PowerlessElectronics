@@ -77,6 +77,7 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.medium.rechargable.battery`
 - `powerlesselectronics.memorycell`
 - `powerlesselectronics.microphonestandio`
+- `powerlesselectronics.minifridge`
 - `powerlesselectronics.modularcarlift`
 - `powerlesselectronics.orswitch`
 - `powerlesselectronics.poweredwaterpurifier`
@@ -353,6 +354,10 @@ Default configuration (no entities provide free power):
       "Require permission": false,
       "Generate power amount": 0
     },
+    "minifridge.deployed": {
+      "Require permission": false,
+      "Generate power amount": 0
+    },
     "orswitch.entity": {
       "Require permission": false,
       "Input slots": [
@@ -569,6 +574,7 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `laserdetector`: 2+
 - `laserlight.deployed`: 1+
 - `microphonestandio`: 1+
+- `minifridge.deployed`: 2
 - `orswitch.entity`: 2+, 2+
 - `poweredwaterpurifier.deployed`: 5
 - `pressurepad.deployed`: 2+
