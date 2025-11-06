@@ -10,7 +10,7 @@ using static IOEntity;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.2.7")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.3.0")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
