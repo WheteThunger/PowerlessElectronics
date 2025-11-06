@@ -850,10 +850,14 @@ namespace Oxide.Plugins
             private static readonly int[] StandardInputSlot = { 0 };
 
             [JsonProperty("RequirePermission")]
-            public bool RequirePermission = false;
+            public bool DeprecatedRequirePermission { set => RequirePermission = value; }
+            [JsonProperty("Require permission")]
+            public bool RequirePermission;
 
             // Hidden from config when it's using the default value
             [JsonProperty("InputSlots")]
+            public int[] DeprecatedInputSlots { set => InputSlots = value; }
+            [JsonProperty("Input slots")]
             public int[] InputSlots = StandardInputSlot;
 
             public bool ShouldSerializeInputSlots() =>
@@ -861,15 +865,20 @@ namespace Oxide.Plugins
 
             // Hidden from config when the plural form is used
             [JsonProperty("PowerAmount")]
-            public int PowerAmount = 0;
+            public int DeprecatedPowerAmount { set => PowerAmount = value; }
+            [JsonProperty("Generate power amount")]
+            public int PowerAmount;
 
             public bool ShouldSerializePowerAmount() =>
                 PowerAmounts == null;
 
             // Hidden from config when null
-            [JsonProperty("PowerAmounts", DefaultValueHandling = DefaultValueHandling.Ignore)]
+            [JsonProperty("PowerAmounts")]
+            public int[] DeprecatedPowerAmounts { set => PowerAmounts = value; }
+            [JsonProperty("Generate power amounts", DefaultValueHandling = DefaultValueHandling.Ignore)]
             public int[] PowerAmounts;
 
+            [JsonIgnore]
             public string PermissionName;
 
             public bool Enabled

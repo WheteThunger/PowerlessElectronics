@@ -23,13 +23,13 @@ If you configured the plugin correctly, then:
 ### Troubleshooting
 
 - After granting permissions or roles, you will need to reload the plugin to automatically power existing entities
-- Make sure you grant permissions for each entity that you configured with `"RequirePermission": true` (off by default)
+- Make sure you grant permissions for each entity that you configured with `"Require permission": true` (off by default)
 - Make sure that the amount of power you configured for each entity is at least the power requirement, or there will be no effect
   - The configuration section below lists the power requirement for most entities to help you configure the plugin for your use case
 
 ## Permissions
 
-Note: Permissions are only necessary if the corresponding entity's configuration has specified `"RequirePermission": true`. The default is `false` for all entities.
+Note: Permissions are only necessary if the corresponding entity's configuration has specified `"Require permission": true`. The default is `false` for all entities.
 
 - `powerlesselectronics.all` -- All electrical entities deployed by players with this permission will have free power determined by the plugin configuration. You must also configure the power amount for each entity for this to have any effect.
 
@@ -128,375 +128,375 @@ Default configuration (no entities provide free power):
   "Add switch to powerless SAM sites": false,
   "Entities": {
     "andswitch.entity": {
-      "RequirePermission": false,
-      "InputSlots": [
+      "Require permission": false,
+      "Input slots": [
         0,
         1
       ],
-      "PowerAmounts": [
+      "Generate power amounts": [
         0,
         0
       ]
     },
     "audioalarm": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "autoturret_deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "boombox.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "button": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "cctv_deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "ceilinglight.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "counter": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "discoball.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "discofloor.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "discofloor.largetiles.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "doorcontroller.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.bulbstringlights.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.chandelier.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.digitalclock.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.fairylights.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.flasherlight.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.fluorescentlight.ceiling.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.fluorescentlight.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.seismicsensor.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.sirenlight.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.spotlight.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.spotlight.tripod.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.tablelamp.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electric.wallcabinet.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electrical.blocker.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electrical.branch.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electrical.combiner.deployed": {
-      "RequirePermission": false,
-      "InputSlots": [
+      "Require permission": false,
+      "Input slots": [
         0,
         1
       ],
-      "PowerAmounts": [
+      "Generate power amounts": [
         0,
         0
       ]
     },
     "electrical.heater": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electrical.memorycell.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electrical.modularcarlift.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electrical.random.switch.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "electricfurnace.io": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "elevator": {
-      "RequirePermission": false,
-      "InputSlots": [
+      "Require permission": false,
+      "Input slots": [
         2
       ],
-      "PowerAmount": 0
+      "Generate power amount": 0
     },
     "fluidswitch": {
-      "RequirePermission": false,
-      "InputSlots": [
+      "Require permission": false,
+      "Input slots": [
         2
       ],
-      "PowerAmount": 0
+      "Generate power amount": 0
     },
     "fridge.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "hbhfsensor.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "hopper.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "igniter.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "industrial.wall.lamp.blue.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "industrial.wall.lamp.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "industrial.wall.lamp.green.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "industrial.wall.lamp.red.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "industrialconveyor.deployed": {
-      "RequirePermission": false,
-      "InputSlots": [
+      "Require permission": false,
+      "Input slots": [
         1
       ],
-      "PowerAmount": 0
+      "Generate power amount": 0
     },
     "industrialcrafter.deployed": {
-      "RequirePermission": false,
-      "InputSlots": [
+      "Require permission": false,
+      "Input slots": [
         1
       ],
-      "PowerAmount": 0
+      "Generate power amount": 0
     },
     "large.rechargable.battery.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "laserdetector": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "laserlight.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "medium.rechargable.battery.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "microphonestandio.entity": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "orswitch.entity": {
-      "RequirePermission": false,
-      "InputSlots": [
+      "Require permission": false,
+      "Input slots": [
         0,
         1
       ],
-      "PowerAmounts": [
+      "Generate power amounts": [
         0,
         0
       ]
     },
     "poweredwaterpurifier.deployed": {
-      "RequirePermission": false,
-      "InputSlots": [
+      "Require permission": false,
+      "Input slots": [
         1
       ],
-      "PowerAmount": 0
+      "Generate power amount": 0
     },
     "pressurepad.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "ptz_cctv_deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "reactivetarget_deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "rfbroadcaster": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "rfreceiver": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "sam_site_turret_deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "sculpture.ice.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "searchlight.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "sign.neon.125x125": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "sign.neon.125x215": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "sign.neon.125x215.animated": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "sign.neon.xl": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "sign.neon.xl.animated": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "simplelight": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "smallrechargablebattery.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "smartalarm": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "smartswitch": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "splitter": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "storageadaptor.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0,
-      "InputSlots": [
+      "Require permission": false,
+      "Generate power amount": 0,
+      "Input slots": [
         1
       ]
     },
     "storagemonitor.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "switch": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "telephone.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "teslacoil.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "timer": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "vendingmachine.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "water.pump.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "weaponracklight": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "weaponracklightdouble": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "xmas.advanced.lights.deployed": {
-      "RequirePermission": false,
-      "PowerAmount": 0
+      "Require permission": false,
+      "Generate power amount": 0
     },
     "xorswitch.entity": {
-      "RequirePermission": false,
-      "InputSlots": [
+      "Require permission": false,
+      "Input slots": [
         0,
         1
       ],
-      "PowerAmounts": [
+      "Generate power amounts": [
         0,
         0
       ]
@@ -510,10 +510,10 @@ Default configuration (no entities provide free power):
 
 Each entity type has the following configuration options, mapped in the config to the entity's prefab short name.
 
-- `RequirePermission` (`true` or `false`) -- While `true`, only entities of this type that were deployed by players with the corresponding permission will receive the power configured here. While `false`, all entities of this type will have the power configured here.
-- `PowerAmount` -- Amount of power to provide to each input where a wire is missing.
-- `PowerAmounts` -- List of power amounts, applicable when the entity has multiple power inputs. You can also use the `PowerAmount` (singular) option to apply the same amount to all inputs.
-- `InputSlots` (Advanced) -- You should only need to configure this option if you want to provide free power for an entity that is not yet in the plugin's default configuration, such as when new items are introduced to the game. This option controls which internal slot numbers to assign power to. Most entities only have one power input which is usually at slot `0`, but some have multiple or use different numbers due to also having water inputs.
+- `Require permission` (`true` or `false`) -- While `true`, only entities of this type that were deployed by players with the corresponding permission will receive the power configured here. While `false`, all entities of this type will have the power configured here.
+- `Generate power amount` -- Amount of power to provide to each input where a wire is missing.
+- `Generate power amounts` -- List of power amounts, applicable when the entity has multiple power inputs. You can also use the `Generate power amount` (singular) option to apply the same amount to all inputs.
+- `Input slots` (Advanced) -- You should only need to configure this option if you want to provide free power for an entity that is not yet in the plugin's default configuration, such as when new items are introduced to the game. This option controls which internal slot numbers to assign power to. Most entities only have one power input which is usually at slot `0`, but some have multiple or use different numbers due to also having water inputs.
 
 Note: This plugin ignores any input slot which is configured with `0` power, so it will not interfere with other plugins that provide powerless functionality. The only gotcha is that if you provided free power to an entity via this plugin and then changed the configuration to provide `0` power, the entity will have free power until a wire is connected to that input, or until the next server restart.
 
