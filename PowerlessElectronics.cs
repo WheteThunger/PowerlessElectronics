@@ -10,7 +10,7 @@ using static IOEntity;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.3.0")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.3.1")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -92,9 +92,16 @@ namespace Oxide.Plugins
             foreach (var entity in BaseNetworkable.serverEntities)
             {
                 var ioEntity = entity as IOEntity;
-                if (ioEntity != null)
+                if (ioEntity == null)
+                    continue;
+
+                ProcessIOEntity(ioEntity, delay: false);
+
+                // Fix switch-able industrial entities that were stuck in the Busy state due to their power being
+                // removed during server shutdown.
+                if (ioEntity is IndustrialConveyor or IndustrialCrafter)
                 {
-                    ProcessIOEntity(ioEntity, delay: false);
+                    ioEntity.SetFlag(BaseEntity.Flags.Busy, false);
                 }
             }
 
@@ -112,6 +119,11 @@ namespace Oxide.Plugins
             foreach (var ioEntity in _modifiedEntities)
             {
                 if (ioEntity == null)
+                    continue;
+
+                // Skip resetting power for IndustrialConveyor and IndustrialCrafter entities during server reboot, so
+                // their On state isn't forgotten (not saved by Rust) and so they don't get stuck Busy.
+                if (Interface.Oxide.IsShuttingDown && ioEntity is IndustrialConveyor or IndustrialCrafter)
                     continue;
 
                 ResetEntityPower(ioEntity);
