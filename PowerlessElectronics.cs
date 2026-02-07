@@ -257,7 +257,8 @@ namespace Oxide.Plugins
         private static bool IsEntityNormallyParented(IOEntity ioEntity)
         {
             return IsHybridIOEntity(ioEntity)
-                || ioEntity is IndustrialStorageAdaptor or IndustrialCrafter or StorageMonitor or DoorManipulator;
+                || ioEntity is IndustrialStorageAdaptor or IndustrialCrafter or StorageMonitor or DoorManipulator
+                || ioEntity is SimpleLight && ioEntity.ShortPrefabName.Contains("neonsigntr");
         }
 
         private static BaseEntity GetOwnerEntity(IOEntity ioEntity)
