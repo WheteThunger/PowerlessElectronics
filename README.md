@@ -87,6 +87,7 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.neonsigntr`
 - `powerlesselectronics.modularcarlift`
 - `powerlesselectronics.orswitch`
+- `powerlesselectronics.paintable_reactive_target`
 - `powerlesselectronics.poweredwaterpurifier`
 - `powerlesselectronics.pressurepad`
 - `powerlesselectronics.ptz_cctv`
@@ -404,6 +405,10 @@ Default configuration (no entities provide free power):
         0
       ]
     },
+    "paintable_reactive_target.deployed": {
+      "Require permission": false,
+      "Generate power amount": 0
+    },
     "poweredwaterpurifier.deployed": {
       "Require permission": false,
       "Input slots": [
@@ -485,10 +490,10 @@ Default configuration (no entities provide free power):
     },
     "storageadaptor.deployed": {
       "Require permission": false,
-      "Generate power amount": 0,
       "Input slots": [
         1
-      ]
+      ],
+      "Generate power amount": 0
     },
     "storagemonitor.deployed": {
       "Require permission": false,
@@ -618,6 +623,7 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `minifridge.deployed`: 2
 - `neonsigntr`: 1
 - `orswitch.entity`: 2+, 2+
+- `paintable_reactive_target.deployed`: 2+
 - `poweredwaterpurifier.deployed`: 5
 - `pressurepad.deployed`: 2+
 - `ptz_cctv_deployed`: 3
