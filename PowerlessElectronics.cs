@@ -10,7 +10,7 @@ using static IOEntity;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.3.1")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.4.0")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -251,7 +251,7 @@ namespace Oxide.Plugins
         private static bool IsHybridIOEntity(IOEntity ioEntity)
         {
             return ioEntity is ElectricFurnaceIO or MicrophoneStandIOEntity or Hopper
-                || (ioEntity is SimpleLight && ioEntity.GetParentEntity() is WeaponRack);
+                || (ioEntity is SimpleLight && ioEntity.GetParentEntity() is WeaponRack or FlagTogglePhotoFrame);
         }
 
         private static bool IsEntityNormallyParented(IOEntity ioEntity)
@@ -764,6 +764,17 @@ namespace Oxide.Plugins
                     InputSlots = new[] { 0, 1 },
                     PowerAmounts = new[] { 0, 0 },
                 },
+
+                // FlagTogglePhotoFrame signs have SimpleLight child entities which have no pickup target, so there is
+                // no easy way to auto-detect them. We don't want to automatically detect all SimpleLight prefabs
+                // because it would detect ShutterFrame signs which would be automatically closed when deployed if they
+                // were to be given free power.
+                ["lightupframe.ioent.large"] = new EntityConfig(),
+                ["lightupframe.ioent.medium"] = new EntityConfig(),
+                ["lightupframe.ioent.small"] = new EntityConfig(),
+                ["lightupframe.ioent.standing"] = new EntityConfig(),
+                ["lightupframe.ioent.xl"] = new EntityConfig(),
+                ["lightupframe.ioent.xxl"] = new EntityConfig(),
             };
 
             public List<string> AddMissingPrefabs()

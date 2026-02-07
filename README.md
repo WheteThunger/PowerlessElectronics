@@ -74,6 +74,12 @@ As an alternative to the `all` permission, you can grant permissions by entity t
 - `powerlesselectronics.large.rechargable.battery`
 - `powerlesselectronics.laserdetector`
 - `powerlesselectronics.laserlight`
+- `powerlesselectronics.lightupframe.ioent.large`
+- `powerlesselectronics.lightupframe.ioent.medium`
+- `powerlesselectronics.lightupframe.ioent.small`
+- `powerlesselectronics.lightupframe.ioent.standing`
+- `powerlesselectronics.lightupframe.ioent.xl`
+- `powerlesselectronics.lightupframe.ioent.xxl`
 - `powerlesselectronics.medium.rechargable.battery`
 - `powerlesselectronics.memorycell`
 - `powerlesselectronics.microphonestandio`
@@ -347,6 +353,30 @@ Default configuration (no entities provide free power):
       "Require permission": false,
       "Generate power amount": 0
     },
+    "lightupframe.ioent.large": {
+      "Require permission": false,
+      "Generate power amount": 0
+    },
+    "lightupframe.ioent.medium": {
+      "Require permission": false,
+      "Generate power amount": 0
+    },
+    "lightupframe.ioent.small": {
+      "Require permission": false,
+      "Generate power amount": 0
+    },
+    "lightupframe.ioent.standing": {
+      "Require permission": false,
+      "Generate power amount": 0
+    },
+    "lightupframe.ioent.xl": {
+      "Require permission": false,
+      "Generate power amount": 0
+    },
+    "lightupframe.ioent.xxl": {
+      "Require permission": false,
+      "Generate power amount": 0
+    },
     "medium.rechargable.battery.deployed": {
       "Require permission": false,
       "Generate power amount": 0
@@ -578,6 +608,12 @@ To help you configure the plugin for your use case, the minimum amount of useful
 - `industrialcrafter.deployed`: 1
 - `laserdetector`: 2+
 - `laserlight.deployed`: 1+
+- `lightupframe.ioent.large`: 1
+- `lightupframe.ioent.medium`: 1
+- `lightupframe.ioent.small`: 1
+- `lightupframe.ioent.standing`: 1
+- `lightupframe.ioent.xl`: 1
+- `lightupframe.ioent.xxl`: 1
 - `microphonestandio`: 1+
 - `minifridge.deployed`: 2
 - `neonsigntr`: 1
