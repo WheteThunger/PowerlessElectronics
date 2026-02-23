@@ -1,16 +1,18 @@
-﻿using Newtonsoft.Json;
+﻿using HarmonyLib;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Oxide.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using UnityEngine;
 using static IOEntity;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.4.0")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.4.1")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -31,6 +33,7 @@ namespace Oxide.Plugins
         private const int AutoTurretInputSlot = 0;
         private const int SamSiteInputSlot = 0;
 
+        private static PowerlessElectronics _plugin;
         private Configuration _config;
         private HashSet<IOEntity> _modifiedEntities = new();
         private DynamicHookSubscriber<ElectricSwitch> _attachedSwitches;
@@ -49,10 +52,57 @@ namespace Oxide.Plugins
 
         #endregion
 
+        #region Harmony Patches
+
+        [HarmonyPatch(typeof(ContainerIOEntity), "CanCompletePickup")]
+        private static class ContainerIOEntity_CanCompletePickup_Patch
+        {
+            public static string MethodNameToPatch = "CanCompletePickup";
+
+            public static bool ShouldSkipChildrenCheck(ContainerIOEntity instance)
+            {
+                return _plugin != null && _plugin.HasChildSwitchManagedByThisPlugin(instance);
+            }
+
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                var instructionList = new List<CodeInstruction>(instructions);
+
+                // Use CodeMatcher to locate the exact sequence:
+                //   ldarg.0 (load 'this') -> ldfld children -> callvirt get_Count -> brfalse(.s)
+                var matcher = new CodeMatcher(instructionList)
+                    .MatchEndForward(
+                        new CodeMatch(OpCodes.Ldarg_0),  // Load 'this' - always ldarg.0 for instance methods
+                        new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(BaseNetworkable), nameof(BaseNetworkable.children))),
+                        new CodeMatch(ci => ci.Calls(AccessTools.PropertyGetter(typeof(List<BaseEntity>), nameof(List<BaseEntity>.Count)))),
+                        new CodeMatch(ci => ci.opcode == OpCodes.Brfalse || ci.opcode == OpCodes.Brfalse_S)  // Branch if Count == 0
+                    );
+
+                if (!matcher.IsValid)
+                    throw new Exception("Harmony transpiler pattern not matched for ContainerIOEntity.CanCompletePickup.");
+
+                // At this point, the original code will show an error message, so add another if statement to branch
+                // away from that code if the entity has a child switch managed by this plugin.
+                var branchTarget = matcher.Instruction.operand;
+
+                // Insert the new code after the branch instruction.
+                matcher.Advance(1).Insert(
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(ContainerIOEntity_CanCompletePickup_Patch), nameof(ShouldSkipChildrenCheck))),
+                    new CodeInstruction(OpCodes.Brtrue, branchTarget)
+                );
+
+                return matcher.InstructionEnumeration();
+            }
+        }
+
+        #endregion
+
         #region Hooks
 
         private void Init()
         {
+            _plugin = this;
             _data = StoredData.Load();
             Unsubscribe(nameof(OnEntitySpawned));
             _attachedSwitches.UnsubscribeAll();
@@ -63,6 +113,29 @@ namespace Oxide.Plugins
             _immortalProtection = ScriptableObject.CreateInstance<ProtectionProperties>();
             _immortalProtection.name = $"{Name}Protection";
             _immortalProtection.Add(1);
+
+            // Apply Harmony patch to allow pickup of Auto Turrets and Sam Sites with attached switches.
+            if (_config.AddSwitchToPowerlessAutoTurrets || _config.AddSwitchToPowerlessSamSites)
+            {
+                try
+                {
+                    var transpilerMethod = AccessTools.Method(typeof(ContainerIOEntity_CanCompletePickup_Patch), nameof(ContainerIOEntity_CanCompletePickup_Patch.Transpiler));
+                    var originalMethod = AccessTools.Method(typeof(ContainerIOEntity), ContainerIOEntity_CanCompletePickup_Patch.MethodNameToPatch);
+
+                    if (originalMethod == null)
+                        throw new Exception("Failed to find original method for ContainerIOEntity.CanCompletePickup");
+
+                    if (transpilerMethod == null)
+                        throw new Exception("Failed to find Transpiler method for ContainerIOEntity.CanCompletePickup");
+
+                    HarmonyInstance.Patch(originalMethod, transpiler: new HarmonyMethod(transpilerMethod));
+                }
+                catch (Exception ex)
+                {
+                    LogError($"Failed to apply Harmony patch. As a result, auto turrets and sam sites with attached switches may not be able to be picked up. "
+                             + $"Please report this to the plugin maintainer with details on how to reproduce.\n{ex}");
+                }
+            }
 
             // Don't overwrite the config if invalid since the user will lose their config!
             if (!_config.UsingDefaults)
@@ -114,6 +187,8 @@ namespace Oxide.Plugins
 
         private void Unload()
         {
+            _plugin = null;
+
             UnityEngine.Object.Destroy(_immortalProtection);
 
             foreach (var ioEntity in _modifiedEntities)
@@ -242,6 +317,9 @@ namespace Oxide.Plugins
         #endregion
 
         #region Helper Methods
+
+        public static void LogError(string message) => Interface.Oxide.LogError($"[Powerless Electronics] {message}");
+        public static void LogWarning(string message) => Interface.Oxide.LogWarning($"[Powerless Electronics] {message}");
 
         private static bool InputUpdateWasBlocked(IOEntity ioEntity, int inputSlot, int amount)
         {
@@ -524,6 +602,12 @@ namespace Oxide.Plugins
             electricSwitch.Spawn();
             _attachedSwitches.Add(electricSwitch);
             return electricSwitch;
+        }
+
+        private bool HasChildSwitchManagedByThisPlugin(IOEntity ioEntity)
+        {
+            var electricSwitch = GetChildEntity<ElectricSwitch>(ioEntity);
+            return electricSwitch != null && _attachedSwitches.Contains(electricSwitch);
         }
 
         #endregion
