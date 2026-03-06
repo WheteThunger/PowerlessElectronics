@@ -12,7 +12,7 @@ using static IOEntity;
 
 namespace Oxide.Plugins
 {
-    [Info("Powerless Electronics", "WhiteThunder", "1.4.1")]
+    [Info("Powerless Electronics", "WhiteThunder", "1.4.2")]
     [Description("Allows electrical entities to generate their own power when not plugged in.")]
     internal class PowerlessElectronics : CovalencePlugin
     {
@@ -334,7 +334,8 @@ namespace Oxide.Plugins
 
         private static bool IsEntityNormallyParented(IOEntity ioEntity)
         {
-            return IsHybridIOEntity(ioEntity)
+            return ioEntity.GetParentEntity() is PlayerBoat
+                || IsHybridIOEntity(ioEntity)
                 || ioEntity is IndustrialStorageAdaptor or IndustrialCrafter or StorageMonitor or DoorManipulator
                 || ioEntity is SimpleLight && ioEntity.ShortPrefabName.Contains("neonsigntr");
         }
